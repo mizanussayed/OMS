@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="OMS.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:OMS.Pages"
+    Title="OMS"
+    Shell.FlyoutBehavior="Disabled">
+
+    <!-- Login Page (no tabs) -->
+    <ShellContent 
+        Route="Login"
+        ContentTemplate="{DataTemplate pages:LoginPage}" 
+        Shell.NavBarIsVisible="False"
+        Shell.TabBarIsVisible="False"/>
+
+    <!-- Main App with Bottom TabBar -->
+    <TabBar Route="Main">
+        <Tab Title="Dashboard" Icon="dashboard.png">
+            <ShellContent 
+                Route="Dashboard"
+                Title="Dashboard"
+                ContentTemplate="{DataTemplate pages:DashboardPage}">
+                <ShellContent.Icon>
+                    <FontImageSource 
+                        Glyph="&#x1F4CA;" 
+                        FontFamily="SegoeUIEmoji"
+                        Color="{StaticResource Gray500}"/>
+                </ShellContent.Icon>
+            </ShellContent>
+        </Tab>
+
+        <Tab Title="Inventory" Icon="package.png">
+            <ShellContent 
+                Route="ClothInventory"
+                Title="Inventory"
+                ContentTemplate="{DataTemplate pages:ClothInventoryPage}">
+                <ShellContent.Icon>
+                    <FontImageSource 
+                        Glyph="&#x1F4E6;" 
+                        FontFamily="SegoeUIEmoji"
+                        Color="{StaticResource Gray500}"/>
+                </ShellContent.Icon>
+            </ShellContent>
+        </Tab>
+
+        <Tab Title="Orders" Icon="orders.png">
+            <ShellContent 
+                Route="DressOrders"
+                Title="Orders"
+                ContentTemplate="{DataTemplate pages:DressOrdersPage}">
+                <ShellContent.Icon>
+                    <FontImageSource 
+                        Glyph="&#x1F6CD;" 
+                        FontFamily="SegoeUIEmoji"
+                        Color="{StaticResource Gray500}"/>
+                </ShellContent.Icon>
+            </ShellContent>
+        </Tab>
+    </TabBar>
+
+</Shell>

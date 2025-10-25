@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OMS.Components.CardView"
+             x:Name="this">
+    
+    <Border BackgroundColor="{Binding Source={x:Reference this}, Path=BackgroundColor}"
+            StrokeThickness="{Binding Source={x:Reference this}, Path=BorderWidth}"
+            Stroke="{Binding Source={x:Reference this}, Path=BorderColor}"
+            Padding="{Binding Source={x:Reference this}, Path=Padding}"
+            Margin="{Binding Source={x:Reference this}, Path=Margin}">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="{Binding Source={x:Reference this}, Path=CardCornerRadius}" />
+        </Border.StrokeShape>
+        <Border.Shadow>
+            <Shadow Brush="{StaticResource Gray900}"
+                    Opacity="{Binding Source={x:Reference this}, Path=ShadowOpacity}"
+                    Radius="{Binding Source={x:Reference this}, Path=ShadowRadius}"
+                    Offset="{Binding Source={x:Reference this}, Path=ShadowOffset}" />
+        </Border.Shadow>
+        <ContentPresenter Content="{Binding Source={x:Reference this}, Path=CardContent}" />
+    </Border>
+</ContentView>

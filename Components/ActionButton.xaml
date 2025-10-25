@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OMS.Components.ActionButton"
+             x:Name="this">
+    <Button Text="{Binding Text, Source={x:Reference this}}"
+            Command="{Binding Command, Source={x:Reference this}}"
+            CommandParameter="{Binding CommandParameter, Source={x:Reference this}}"
+            TextColor="{Binding TextColor, Source={x:Reference this}}"
+            Background="{Binding ButtonBackground, Source={x:Reference this}}"
+            BorderColor="{Binding ButtonBorderColor, Source={x:Reference this}}"
+            BorderWidth="{Binding ButtonBorderWidth, Source={x:Reference this}}"
+            FontSize="{Binding FontSize, Source={x:Reference this}}"
+            FontAttributes="{Binding FontAttributes, Source={x:Reference this}}"
+            CornerRadius="8"
+            Padding="16,12"
+            IsEnabled="{Binding IsEnabled, Source={x:Reference this}}"
+            HorizontalOptions="{Binding HorizontalOptions, Source={x:Reference this}}"/>
+</ContentView>

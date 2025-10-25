@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="OMS.Pages.LoginPage"
+    Title="Login"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource Purple600}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <LinearGradientBrush x:Key="LoginGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="{StaticResource Purple600}" Offset="0.0" />
+                <GradientStop Color="{StaticResource Pink500}" Offset="0.5" />
+                <GradientStop Color="{StaticResource Orange500}" Offset="1.0" />
+            </LinearGradientBrush>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid Background="{StaticResource LoginGradient}">
+        <ScrollView>
+            <VerticalStackLayout VerticalOptions="Center" Padding="20" Spacing="20">
+                <!-- Login Card -->
+                <Border BackgroundColor="{StaticResource White}" 
+                        StrokeThickness="0"
+                        Padding="32"
+                        MaximumWidthRequest="400"
+                        HorizontalOptions="Center"
+                        WidthRequest="400">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <Border.Shadow>
+                        <Shadow Brush="{StaticResource Gray900}"
+                                Opacity="0.2"
+                                Radius="20"
+                                Offset="0,10" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="24">
+                        <!-- Logo/Header -->
+                        <VerticalStackLayout HorizontalOptions="Center" Spacing="16">
+                            <Border WidthRequest="64" 
+                                    HeightRequest="64" 
+                                    Padding="0"
+                                    Background="{StaticResource PurplePinkGradient}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="32" />
+                                </Border.StrokeShape>
+                                <Label Text="&#x1F464;" 
+                                       FontSize="32" 
+                                       HorizontalOptions="Center" 
+                                       VerticalOptions="Center"/>
+                            </Border>
+                            <Label Text="Cloth Shop Manager" 
+                                   FontSize="24" 
+                                   FontAttributes="Bold" 
+                                   TextColor="{StaticResource Gray900}"
+                                   HorizontalOptions="Center"/>
+                            <Label Text="Sign in to continue" 
+                                   FontSize="14" 
+                                   TextColor="{StaticResource Gray600}"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+
+                        <!-- Role Selection -->
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Select Role" 
+                                   FontSize="14" 
+                                   FontAttributes="Bold" 
+                                   TextColor="{StaticResource Gray900}"/>
+                            
+                            <!-- Admin Role -->
+                            <Border StrokeThickness="1"
+                                    Stroke="{StaticResource Gray200}" 
+                                    BackgroundColor="{StaticResource White}"
+                                    Padding="16">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectRoleCommand}" CommandParameter="admin"/>
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <RadioButton Grid.Column="0" 
+                                                GroupName="Role" 
+                                                Value="admin" 
+                                                IsChecked="{Binding IsAdminSelected}"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                        <Label Text="Admin" 
+                                               FontSize="16" 
+                                               FontAttributes="Bold" 
+                                               TextColor="{StaticResource Gray900}"/>
+                                        <Label Text="Full access to all features" 
+                                               FontSize="12" 
+                                               TextColor="{StaticResource Gray500}"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+
+                            <!-- Maker Role -->
+                            <Border StrokeThickness="1"
+                                    Stroke="{StaticResource Gray200}" 
+                                    BackgroundColor="{StaticResource White}"
+                                    Padding="16">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectRoleCommand}" CommandParameter="maker"/>
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                    <RadioButton Grid.Column="0" 
+                                                GroupName="Role" 
+                                                Value="maker" 
+                                                IsChecked="{Binding IsMakerSelected}"/>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                        <Label Text="Maker/Tailor" 
+                                               FontSize="16" 
+                                               FontAttributes="Bold" 
+                                               TextColor="{StaticResource Gray900}"/>
+                                        <Label Text="View and update assigned orders" 
+                                               FontSize="12" 
+                                               TextColor="{StaticResource Gray500}"/>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Maker Selection (visible when maker role is selected) -->
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding IsMakerSelected}">
+                            <Label Text="Select Maker" 
+                                   FontSize="14" 
+                                   FontAttributes="Bold" 
+                                   TextColor="{StaticResource Gray900}"/>
+                            <Picker ItemsSource="{Binding Makers}" 
+                                    SelectedItem="{Binding SelectedMaker}"
+                                    BackgroundColor="{StaticResource White}"
+                                    TextColor="{StaticResource Gray900}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Login Button -->
+                        <Button Text="Sign In" 
+                                Command="{Binding LoginCommand}"
+                                Background="{StaticResource PurplePinkGradient}"
+                                TextColor="{StaticResource White}"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                HeightRequest="48"
+                                CornerRadius="8"/>
+
+                        <!-- Demo Info -->
+                        <Border BackgroundColor="{StaticResource Blue50}" 
+                                StrokeThickness="1"
+                                Stroke="{StaticResource Blue200}"
+                                Padding="12">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Label FontSize="12" TextColor="{StaticResource Blue800}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Demo Mode: " FontAttributes="Bold"/>
+                                        <Span Text="Select a role to explore different access levels. No password required."/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

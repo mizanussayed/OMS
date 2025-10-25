@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OMS.Components.InputField"
+             x:Name="this">
+    <VerticalStackLayout Spacing="6">
+        <!-- Label -->
+        <Label Text="{Binding Label, Source={x:Reference this}}"
+               FontSize="14"
+               FontAttributes="Bold"
+               TextColor="{StaticResource Gray700}"
+               IsVisible="{Binding HasLabel, Source={x:Reference this}}"/>
+        
+        <!-- Input Border -->
+        <Border StrokeThickness="1"
+                Stroke="{Binding BorderColor, Source={x:Reference this}}"
+                BackgroundColor="{StaticResource White}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <Entry Text="{Binding Text, Source={x:Reference this}, Mode=TwoWay}"
+                   Placeholder="{Binding Placeholder, Source={x:Reference this}}"
+                   Keyboard="{Binding Keyboard, Source={x:Reference this}}"
+                   IsPassword="{Binding IsPassword, Source={x:Reference this}}"
+                   MaxLength="{Binding MaxLength, Source={x:Reference this}}"
+                   TextColor="{StaticResource Gray900}"
+                   PlaceholderColor="{StaticResource Gray400}"
+                   FontSize="14"
+                   Margin="12,8"
+                   TextChanged="OnTextChanged"
+                   Focused="OnFocused"
+                   Unfocused="OnUnfocused"/>
+        </Border>
+        
+        <!-- Error Message -->
+        <Label Text="{Binding ErrorMessage, Source={x:Reference this}}"
+               FontSize="12"
+               TextColor="{StaticResource Orange600}"
+               IsVisible="{Binding HasError, Source={x:Reference this}}"/>
+        
+        <!-- Helper Text -->
+        <Label Text="{Binding HelperText, Source={x:Reference this}}"
+               FontSize="12"
+               TextColor="{StaticResource Gray500}"
+               IsVisible="{Binding HasHelperText, Source={x:Reference this}}"/>
+    </VerticalStackLayout>
+</ContentView>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="OMS.Components.GradientProgressBar"
+             x:Name="this"
+             HeightRequest="8">
+    
+    <Border Padding="0" 
+            BackgroundColor="{StaticResource Gray200}">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="4" />
+        </Border.StrokeShape>
+        
+        <Border Padding="0" 
+                Background="{Binding Source={x:Reference this}, Path=ProgressGradient}"
+                WidthRequest="{Binding Source={x:Reference this}, Path=ProgressWidth}"
+                HorizontalOptions="Start">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="4" />
+            </Border.StrokeShape>
+        </Border>
+    </Border>
+</ContentView>

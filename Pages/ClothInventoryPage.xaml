@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:OMS.Components"
+    x:Class="OMS.Pages.ClothInventoryPage"
+    Title="Inventory"
+    BackgroundColor="{StaticResource Gray50}">
+    
+    <Grid RowDefinitions="Auto,*">
+        <!-- Gradient Header Component -->
+        <components:GradientHeader Grid.Row="0"
+                                  Title="Cloth Inventory"
+                                  TitleAlignment="Start"
+                                  ActionButtonText="+ Add"
+                                  ShowActionButton="True"
+                                  ActionButtonCommand="{Binding ShowAddClothCommand}"/>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16" Spacing="12">
+                <CollectionView ItemsSource="{Binding Cloths}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border Padding="16" 
+                                    StrokeThickness="1"
+                                    Stroke="{StaticResource Gray100}"
+                                    BackgroundColor="{StaticResource White}"
+                                    Margin="0,0,0,12">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <Border.Shadow>
+                                    <Shadow Brush="{StaticResource Gray900}"
+                                            Opacity="0.1"
+                                            Radius="8"
+                                            Offset="0,2" />
+                                </Border.Shadow>
+                                <VerticalStackLayout Spacing="12">
+                                    <!-- Header -->
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="8">
+                                            <Label Text="{Binding Name}" 
+                                                   FontSize="18"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource Gray900}"/>
+                                            <HorizontalStackLayout Spacing="8">
+                                                <BoxView WidthRequest="16" 
+                                                         HeightRequest="16" 
+                                                         CornerRadius="8"
+                                                         BackgroundColor="{Binding Color, Converter={StaticResource ColorConverter}}"
+                                                         VerticalOptions="Center"/>
+                                                <Label Text="{Binding Color}" 
+                                                       FontSize="14"
+                                                       TextColor="{StaticResource Gray600}"
+                                                       VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                            <Label Text="{Binding PricePerMeter, StringFormat='₹{0}/m'}" 
+                                                   FontSize="16"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource Gray900}"
+                                                   HorizontalOptions="End"/>
+                                            <Label Text="{Binding TotalValue, StringFormat='Total: ₹{0:N0}'}" 
+                                                   FontSize="12"
+                                                   TextColor="{StaticResource Gray500}"
+                                                   HorizontalOptions="End"/>
+                                        </VerticalStackLayout>
+                                    </Grid>
+
+                                    <!-- Stock Info -->
+                                    <VerticalStackLayout Spacing="8">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" 
+                                                   FontSize="14"
+                                                   TextColor="{StaticResource Gray600}">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="Available: "/>
+                                                        <Span Text="{Binding RemainingMeters, StringFormat='{0}m'}"/>
+                                                        <Span Text=" of "/>
+                                                        <Span Text="{Binding TotalMeters, StringFormat='{0}m'}"/>
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                            <Label Grid.Column="1" 
+                                                   Text="Low Stock!" 
+                                                   FontSize="14"
+                                                   TextColor="{StaticResource Orange600}"
+                                                   IsVisible="{Binding IsLowStock}"/>
+                                        </Grid>
+
+                                        <!-- Progress Bar Component -->
+                                        <components:GradientProgressBar Progress="{Binding StockPercent}"
+                                                                       MaxWidth="300"
+                                                                       UseWarningColor="{Binding IsLowStock}"/>
+                                    </VerticalStackLayout>
+
+                                    <!-- Additional Info -->
+                                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray100}"/>
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                            <Label Text="Used" 
+                                                   FontSize="12" 
+                                                   TextColor="{StaticResource Gray500}"/>
+                                            <Label Text="{Binding UsedMeters, StringFormat='{0}m'}" 
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource Gray900}"/>
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                            <Label Text="Added" 
+                                                   FontSize="12" 
+                                                   TextColor="{StaticResource Gray500}"/>
+                                            <Label Text="{Binding AddedDate, StringFormat='{0:MM/dd/yyyy}'}" 
+                                                   FontSize="14"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{StaticResource Gray900}"/>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

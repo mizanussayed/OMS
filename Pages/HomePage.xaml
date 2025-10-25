@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage
+ xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+ xmlns:components="clr-namespace:OMS.Components"
+ x:Class="OMS.Pages.HomePage"
+ x:Name="Home"
+ Title="Home">
+
+ <ScrollView>
+ <VerticalStackLayout Spacing="12" Padding="16">
+ <Label Text="Discover" Style="{StaticResource Headline}" />
+ <CollectionView ItemsLayout="HorizontalList" HeightRequest="48" ItemsSource="{Binding Categories}">
+ <CollectionView.ItemTemplate>
+ <DataTemplate>
+ <components:CategoryChip Text="{Binding .}" IsSelected="{Binding Source={x:Reference Home}, Path=BindingContext.SelectedCategory, Converter={StaticResource StringEqualsConverter}, ConverterParameter={Binding .}}" Command="{Binding Source={x:Reference Home}, Path=BindingContext.SelectCategoryCommand}" CommandParameter="{Binding .}" />
+ </DataTemplate>
+ </CollectionView.ItemTemplate>
+ </CollectionView>
+
+ <Grid>
+ <Grid.RowDefinitions>
+ <RowDefinition Height="Auto" />
+ <RowDefinition Height="*" />
+ </Grid.RowDefinitions>
+
+ <Label Text="Popular" Grid.Row="0" FontAttributes="Bold" FontSize="18" />
+ <CollectionView Grid.Row="1" ItemsLayout="VerticalGrid,2" ItemsSource="{Binding PopularProducts}">
+ <CollectionView.ItemTemplate>
+ <DataTemplate>
+ <components:ProductCard Title="{Binding Title}" Price="{Binding Price}" ImageUrl="{Binding ImageUrl}" AddToCartCommand="{Binding Source={x:Reference Home}, Path=BindingContext.AddToCartCommand}" />
+ </DataTemplate>
+ </CollectionView.ItemTemplate>
+ </CollectionView>
+ </Grid>
+ </VerticalStackLayout>
+ </ScrollView>
+</ContentPage>

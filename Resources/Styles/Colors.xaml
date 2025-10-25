@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
+
+    <!-- Primary/Brand Colors matching React purple-pink gradient -->
+    <Color x:Key="Primary">#9333ea</Color>
+    <Color x:Key="PrimaryDark">#7c3aed</Color>
+    <Color x:Key="PrimaryDarkText">#242424</Color>
+    <Color x:Key="Secondary">#ececf0</Color>
+    <Color x:Key="SecondaryDarkText">#9880e5</Color>
+    <Color x:Key="Tertiary">#ec4899</Color>
+
+    <!-- Purple Shades -->
+    <Color x:Key="Purple100">#f3e8ff</Color>
+    <Color x:Key="Purple500">#a855f7</Color>
+    <Color x:Key="Purple600">#9333ea</Color>
+
+    <!-- Pink Shades -->
+    <Color x:Key="Pink500">#ec4899</Color>
+    <Color x:Key="Pink600">#db2777</Color>
+
+    <!-- Blue Shades -->
+    <Color x:Key="Blue50">#eff6ff</Color>
+    <Color x:Key="Blue100">#dbeafe</Color>
+    <Color x:Key="Blue200">#bfdbfe</Color>
+    <Color x:Key="Blue600">#2563eb</Color>
+    <Color x:Key="Blue700">#1d4ed8</Color>
+    <Color x:Key="Blue800">#1e40af</Color>
+
+    <!-- Green Shades -->
+    <Color x:Key="Green50">#f0fdf4</Color>
+    <Color x:Key="Green100">#dcfce7</Color>
+    <Color x:Key="Green200">#bbf7d0</Color>
+    <Color x:Key="Green600">#16a34a</Color>
+    <Color x:Key="Green800">#166534</Color>
+
+    <!-- Yellow Shades -->
+    <Color x:Key="Yellow100">#fef3c7</Color>
+    <Color x:Key="Yellow200">#fde68a</Color>
+    <Color x:Key="Yellow600">#ca8a04</Color>
+    <Color x:Key="Yellow800">#854d0e</Color>
+
+    <!-- Orange Shades -->
+    <Color x:Key="Orange50">#fff7ed</Color>
+    <Color x:Key="Orange200">#fed7aa</Color>
+    <Color x:Key="Orange500">#f97316</Color>
+    <Color x:Key="Orange600">#ea580c</Color>
+    <Color x:Key="Orange900">#7c2d12</Color>
+
+    <!-- Gray Shades -->
+    <Color x:Key="Gray50">#f9fafb</Color>
+    <Color x:Key="Gray100">#f3f4f6</Color>
+    <Color x:Key="Gray200">#e5e7eb</Color>
+    <Color x:Key="Gray300">#d1d5db</Color>
+    <Color x:Key="Gray400">#9ca3af</Color>
+    <Color x:Key="Gray500">#6b7280</Color>
+    <Color x:Key="Gray600">#4b5563</Color>
+    <Color x:Key="Gray900">#111827</Color>
+
+    <!-- Base Colors -->
+    <Color x:Key="White">#ffffff</Color>
+    <Color x:Key="Black">#000000</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
+    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+
+    <SolidColorBrush x:Key="Gray50Brush" Color="{StaticResource Gray50}"/>
+    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
+    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
+    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
+    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}"/>
+    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
+    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
+    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
+
+    <!-- Gradients -->
+    <LinearGradientBrush x:Key="PurplePinkGradient" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource Purple600}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Pink600}" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="PurplePinkVerticalGradient" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="{StaticResource Purple600}" Offset="0.0" />
+        <GradientStop Color="{StaticResource Pink500}" Offset="0.5" />
+        <GradientStop Color="{StaticResource Orange500}" Offset="1.0" />
+    </LinearGradientBrush>
+</ResourceDictionary>
