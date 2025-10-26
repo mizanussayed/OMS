@@ -8,14 +8,11 @@ namespace OMS
         {
             InitializeComponent();
             
-            // Register routes
             Routing.RegisterRoute("Login", typeof(LoginPage));
             Routing.RegisterRoute("Dashboard", typeof(DashboardPage));
             Routing.RegisterRoute("ClothInventory", typeof(ClothInventoryPage));
             Routing.RegisterRoute("DressOrders", typeof(DressOrdersPage));
-
-            // Start at login page
-            GoToAsync("//Login");
+            Routing.RegisterRoute("MakerWorkspace", typeof(MakerWorkspacePage));
         }
     }
 }

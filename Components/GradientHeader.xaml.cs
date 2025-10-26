@@ -8,13 +8,25 @@ public partial class GradientHeader : ContentView
         BindableProperty.Create(nameof(Title), typeof(string), typeof(GradientHeader), string.Empty);
 
     public static readonly BindableProperty SubtitleProperty =
-        BindableProperty.Create(nameof(Subtitle), typeof(string), typeof(GradientHeader), string.Empty);
+        BindableProperty.Create(nameof(Subtitle), typeof(string), typeof(GradientHeader), string.Empty,
+            propertyChanged: OnSubtitleChanged);
+
+    private static void OnSubtitleChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is GradientHeader header)
+        {
+            header.OnPropertyChanged(nameof(HasSubtitle));
+        }
+    }
 
     public static readonly BindableProperty TitleAlignmentProperty =
         BindableProperty.Create(nameof(TitleAlignment), typeof(LayoutOptions), typeof(GradientHeader), LayoutOptions.Center);
 
     public static readonly BindableProperty ActionButtonTextProperty =
         BindableProperty.Create(nameof(ActionButtonText), typeof(string), typeof(GradientHeader), string.Empty);
+
+    public static readonly BindableProperty ActionButtonIconProperty =
+        BindableProperty.Create(nameof(ActionButtonIcon), typeof(string), typeof(GradientHeader), string.Empty);
 
     public static readonly BindableProperty ActionButtonCommandProperty =
         BindableProperty.Create(nameof(ActionButtonCommand), typeof(ICommand), typeof(GradientHeader), null);
@@ -62,6 +74,12 @@ public partial class GradientHeader : ContentView
     {
         get => (string)GetValue(ActionButtonTextProperty);
         set => SetValue(ActionButtonTextProperty, value);
+    }
+
+    public string ActionButtonIcon
+    {
+        get => (string)GetValue(ActionButtonIconProperty);
+        set => SetValue(ActionButtonIconProperty, value);
     }
 
     public ICommand ActionButtonCommand

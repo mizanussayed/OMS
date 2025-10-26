@@ -5,7 +5,8 @@
              x:Name="this">
     
     <Grid Background="{StaticResource PurplePinkGradient}" 
-          Padding="16,20,16,20">
+          Padding="20,20,20,20"
+          HeightRequest="80">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
@@ -15,30 +16,37 @@
                            Spacing="4"
                            VerticalOptions="Center">
             <Label Text="{Binding Source={x:Reference this}, Path=Title}" 
-                   FontSize="24" 
+                   FontSize="18" 
                    FontAttributes="Bold" 
-                   TextColor="{StaticResource White}"
-                   HorizontalOptions="{Binding Source={x:Reference this}, Path=TitleAlignment}"/>
+                   TextColor="{StaticResource White}"/>
             <Label Text="{Binding Source={x:Reference this}, Path=Subtitle}" 
-                   FontSize="14" 
+                   FontSize="13" 
                    TextColor="{StaticResource White}"
                    Opacity="0.9"
-                   IsVisible="{Binding Source={x:Reference this}, Path=HasSubtitle}"
-                   HorizontalOptions="{Binding Source={x:Reference this}, Path=TitleAlignment}"/>
+                   IsVisible="{Binding Source={x:Reference this}, Path=HasSubtitle}"/>
         </VerticalStackLayout>
 
-        <Button Grid.Column="1" 
-                Text="{Binding Source={x:Reference this}, Path=ActionButtonText}" 
-                FontSize="{Binding Source={x:Reference this}, Path=ActionButtonFontSize}"
-                FontAttributes="Bold"
-                TextColor="{StaticResource White}"
-                Background="{Binding Source={x:Reference this}, Path=ActionButtonBackground}"
-                BorderColor="{Binding Source={x:Reference this}, Path=ActionButtonBorderColor}"
-                BorderWidth="{Binding Source={x:Reference this}, Path=ActionButtonBorderWidth}"
-                Command="{Binding Source={x:Reference this}, Path=ActionButtonCommand}"
-                Padding="12,8"
-                CornerRadius="8"
+        <Border Grid.Column="1" 
+                Padding="8,6"
+                BackgroundColor="Transparent"
+                StrokeThickness="0"
                 IsVisible="{Binding Source={x:Reference this}, Path=ShowActionButton}"
-                VerticalOptions="Center"/>
+                VerticalOptions="Center">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding Source={x:Reference this}, Path=ActionButtonCommand}" />
+            </Border.GestureRecognizers>
+            <HorizontalStackLayout Spacing="6">
+                <Image Source="{Binding Source={x:Reference this}, Path=ActionButtonIcon}"
+                       WidthRequest="16"
+                       HeightRequest="16"
+                       VerticalOptions="Center"
+                       IsVisible="{Binding Source={x:Reference this}, Path=ActionButtonIcon, Converter={StaticResource StringToBoolConverter}}"/>
+                <Label Text="{Binding Source={x:Reference this}, Path=ActionButtonText}" 
+                       FontSize="12"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource White}"
+                       VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </Border>
     </Grid>
 </ContentView>

@@ -42,7 +42,6 @@ public class MockDataService : IDataService
     {
         order = order with { Id = Guid.NewGuid().ToString() };
         _orders.Add(order);
-        // Deduct from cloth remaining
         var cloth = _cloths.FirstOrDefault(c => c.Id == order.ClothId);
         if (cloth != null)
         {

@@ -5,14 +5,16 @@
     xmlns:components="clr-namespace:OMS.Components"
     x:Class="OMS.Pages.ClothInventoryPage"
     Title="Inventory"
-    BackgroundColor="{StaticResource Gray50}">
+    BackgroundColor="{StaticResource Gray50}"
+    Shell.NavBarIsVisible="False">
     
     <Grid RowDefinitions="Auto,*">
         <!-- Gradient Header Component -->
         <components:GradientHeader Grid.Row="0"
                                   Title="Cloth Inventory"
-                                  TitleAlignment="Start"
-                                  ActionButtonText="+ Add"
+                                  Subtitle="Manage your fabric stock"
+                                  ActionButtonIcon="icon_plus.svg"
+                                  ActionButtonText="Add Cloth"
                                   ShowActionButton="True"
                                   ActionButtonCommand="{Binding ShowAddClothCommand}"/>
 
@@ -23,8 +25,7 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Border Padding="16" 
-                                    StrokeThickness="1"
-                                    Stroke="{StaticResource Gray100}"
+                                    StrokeThickness="0"
                                     BackgroundColor="{StaticResource White}"
                                     Margin="0,0,0,12">
                                 <Border.StrokeShape>
@@ -32,90 +33,93 @@
                                 </Border.StrokeShape>
                                 <Border.Shadow>
                                     <Shadow Brush="{StaticResource Gray900}"
-                                            Opacity="0.1"
-                                            Radius="8"
+                                            Opacity="0.08"
+                                            Radius="10"
                                             Offset="0,2" />
                                 </Border.Shadow>
-                                <VerticalStackLayout Spacing="12">
-                                    <!-- Header -->
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="8">
-                                            <Label Text="{Binding Name}" 
-                                                   FontSize="18"
-                                                   FontAttributes="Bold"
-                                                   TextColor="{StaticResource Gray900}"/>
-                                            <HorizontalStackLayout Spacing="8">
-                                                <BoxView WidthRequest="16" 
-                                                         HeightRequest="16" 
-                                                         CornerRadius="8"
-                                                         BackgroundColor="{Binding Color, Converter={StaticResource ColorConverter}}"
-                                                         VerticalOptions="Center"/>
-                                                <Label Text="{Binding Color}" 
-                                                       FontSize="14"
-                                                       TextColor="{StaticResource Gray600}"
-                                                       VerticalOptions="Center"/>
-                                            </HorizontalStackLayout>
-                                        </VerticalStackLayout>
-                                        <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                            <Label Text="{Binding PricePerMeter, StringFormat='₹{0}/m'}" 
-                                                   FontSize="16"
-                                                   FontAttributes="Bold"
-                                                   TextColor="{StaticResource Gray900}"
-                                                   HorizontalOptions="End"/>
-                                            <Label Text="{Binding TotalValue, StringFormat='Total: ₹{0:N0}'}" 
-                                                   FontSize="12"
-                                                   TextColor="{StaticResource Gray500}"
-                                                   HorizontalOptions="End"/>
-                                        </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="10">
+                                    <!-- Header with Name and Price -->
+                                    <Grid ColumnDefinitions="*,Auto" RowSpacing="4">
+                                        <Label Grid.Column="0"
+                                               Text="{Binding Name}" 
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource Gray900}"/>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding PricePerMeter, StringFormat='₹{0}/m'}" 
+                                               FontSize="16"
+                                               FontAttributes="Bold"
+                                               TextColor="{StaticResource Gray900}"
+                                               HorizontalOptions="End"/>
                                     </Grid>
 
-                                    <!-- Stock Info -->
-                                    <VerticalStackLayout Spacing="8">
-                                        <Grid ColumnDefinitions="*,Auto">
-                                            <Label Grid.Column="0" 
+                                    <!-- Color with Total Value -->
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <HorizontalStackLayout Grid.Column="0" Spacing="6">
+                                            <Ellipse WidthRequest="12" 
+                                                    HeightRequest="12"
+                                                    Fill="{Binding Color, Converter={StaticResource ColorConverter}}"
+                                                    VerticalOptions="Center"/>
+                                            <Label Text="{Binding Color}" 
                                                    FontSize="14"
-                                                   TextColor="{StaticResource Gray600}">
-                                                <Label.FormattedText>
-                                                    <FormattedString>
-                                                        <Span Text="Available: "/>
-                                                        <Span Text="{Binding RemainingMeters, StringFormat='{0}m'}"/>
-                                                        <Span Text=" of "/>
-                                                        <Span Text="{Binding TotalMeters, StringFormat='{0}m'}"/>
-                                                    </FormattedString>
-                                                </Label.FormattedText>
-                                            </Label>
-                                            <Label Grid.Column="1" 
-                                                   Text="Low Stock!" 
-                                                   FontSize="14"
-                                                   TextColor="{StaticResource Orange600}"
-                                                   IsVisible="{Binding IsLowStock}"/>
-                                        </Grid>
+                                                   TextColor="{StaticResource Gray600}"
+                                                   VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding TotalValue, StringFormat='Total: ₹{0:N0}'}" 
+                                               FontSize="12"
+                                               TextColor="{StaticResource Gray500}"
+                                               HorizontalOptions="End"
+                                               VerticalOptions="Center"/>
+                                    </Grid>
 
-                                        <!-- Progress Bar Component -->
-                                        <components:GradientProgressBar Progress="{Binding StockPercent}"
-                                                                       MaxWidth="300"
-                                                                       UseWarningColor="{Binding IsLowStock}"/>
-                                    </VerticalStackLayout>
+                                    <!-- Available Stock -->
+                                    <Label FontSize="13"
+                                           TextColor="{StaticResource Gray600}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Available: "/>
+                                                <Span Text="{Binding RemainingMeters, StringFormat='{0}m'}"/>
+                                                <Span Text=" of "/>
+                                                <Span Text="{Binding TotalMeters, StringFormat='{0}m'}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
 
-                                    <!-- Additional Info -->
-                                    <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray100}"/>
-                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <!-- Progress Bar -->
+                                    <Border HeightRequest="6"
+                                            BackgroundColor="{StaticResource Gray200}"
+                                            StrokeThickness="0">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="3" />
+                                        </Border.StrokeShape>
+                                        <Border WidthRequest="{Binding ProgressWidth}"
+                                                HeightRequest="6"
+                                                BackgroundColor="{Binding ProgressColor}"
+                                                HorizontalOptions="Start"
+                                                StrokeThickness="0">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="3" />
+                                            </Border.StrokeShape>
+                                        </Border>
+                                    </Border>
+
+                                    <!-- Used and Added Info -->
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16" Margin="0,4,0,0">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
                                             <Label Text="Used" 
-                                                   FontSize="12" 
+                                                   FontSize="11" 
                                                    TextColor="{StaticResource Gray500}"/>
                                             <Label Text="{Binding UsedMeters, StringFormat='{0}m'}" 
-                                                   FontSize="14"
-                                                   FontAttributes="Bold"
+                                                   FontSize="13"
                                                    TextColor="{StaticResource Gray900}"/>
                                         </VerticalStackLayout>
-                                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2">
                                             <Label Text="Added" 
-                                                   FontSize="12" 
+                                                   FontSize="11" 
                                                    TextColor="{StaticResource Gray500}"/>
                                             <Label Text="{Binding AddedDate, StringFormat='{0:MM/dd/yyyy}'}" 
-                                                   FontSize="14"
-                                                   FontAttributes="Bold"
+                                                   FontSize="13"
                                                    TextColor="{StaticResource Gray900}"/>
                                         </VerticalStackLayout>
                                     </Grid>

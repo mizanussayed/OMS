@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OMS.Models;
+using OMS.Pages;
 using OMS.Services;
 using System.Collections.ObjectModel;
 
@@ -40,10 +41,27 @@ public partial class DressOrdersViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowNewOrder()
     {
-        // TODO: Open new order dialog/sheet
-        if (Application.Current?.Windows.FirstOrDefault()?.Page != null)
+        var dialog = new NewOrderDialog
         {
-            await Application.Current.Windows.FirstOrDefault().Page.DisplayAlert("New Order", "New order feature coming soon", "OK");
+            BindingContext = new NewOrderViewModel(_dataService)
+        };
+        await Shell.Current.Navigation.PushModalAsync(dialog);
+        
+        // Reload data when dialog closes
+        await Task.Delay(500);
+        LoadData();
+    }
+
+    [RelayCommand]
+    private async Task Logout()
+    {
+        App.CurrentUser = null;
+
+        // Switch back to Login page
+        if (App.Current?.Windows.Count > 0)
+        {
+            var loginPage = new LoginPage(new LoginViewModel(_dataService));
+            App.Current.Windows[0].Page = new NavigationPage(loginPage);
         }
     }
 }

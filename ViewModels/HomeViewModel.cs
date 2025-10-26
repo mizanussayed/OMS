@@ -9,18 +9,18 @@ namespace OMS.ViewModels;
 
 public partial class HomeViewModel : ObservableObject
 {
- private readonly IProductService _productService;
+ private readonly IDataService _dataService;
 
  public HomeViewModel()
  {
-  _productService = new MockProductService();
+  _dataService = new MockDataService();
  }
 
  [ObservableProperty]
  private ObservableCollection<string> categories = new() { "All", "Men", "Women", "Kids" };
 
  [ObservableProperty]
- private ObservableCollection<Product> popularProducts = new();
+ private ObservableCollection<Cloth> cloths = new();
 
  [ObservableProperty]
  private string selectedCategory = "All";
@@ -28,20 +28,20 @@ public partial class HomeViewModel : ObservableObject
  [RelayCommand]
  private async Task LoadData()
  {
-  var products = await _productService.GetPopularAsync();
-  PopularProducts = new ObservableCollection<Product>(products);
+  var clothsList = await _dataService.GetClothsAsync();
+  Cloths = new ObservableCollection<Cloth>(clothsList);
  }
 
  [RelayCommand]
  private void SelectCategory(string category)
  {
   SelectedCategory = category;
-  // Filter products if needed
+  // Filter cloths if needed
  }
 
- public ICommand AddToCartCommand => new RelayCommand<Product>(AddToCart);
+ public ICommand AddToCartCommand => new RelayCommand<Cloth>(AddToCart);
 
- private void AddToCart(Product product)
+ private void AddToCart(Cloth cloth)
  {
   // Add to cart logic
  }

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OMS.Models;
+using OMS.Pages;
 using OMS.Services;
 using System.Collections.ObjectModel;
 
@@ -69,11 +70,16 @@ public partial class DashboardViewModel : ObservableObject
     private async Task Logout()
     {
         App.CurrentUser = null;
-        await Shell.Current.GoToAsync("//Login");
+
+        // Switch back to Login page
+        if (App.Current?.Windows.Count > 0)
+        {
+            var loginPage = new LoginPage(new LoginViewModel(_dataService));
+            App.Current.Windows[0].Page = new NavigationPage(loginPage);
+        }
     }
 }
 
-// ViewModel wrapper for Cloth with UI-specific properties
 public class ClothViewModel : ObservableObject
 {
     private readonly Cloth _cloth;

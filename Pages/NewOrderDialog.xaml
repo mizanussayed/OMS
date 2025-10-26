@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:OMS.Components"
+    x:Class="OMS.Pages.NewOrderDialog"
+    BackgroundColor="#80000000">
+    
+    <!-- Semi-transparent overlay -->
+    <Grid>
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Command="{Binding CloseCommand}"/>
+        </Grid.GestureRecognizers>
+        
+        <!-- Bottom Sheet Dialog -->
+        <Border BackgroundColor="White"
+                StrokeThickness="0"
+                VerticalOptions="End"
+                HorizontalOptions="Fill"
+                MaximumHeightRequest="700">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer />
+            </Border.GestureRecognizers>
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="16,16,0,0" />
+            </Border.StrokeShape>
+            
+            <Grid RowDefinitions="Auto,*,Auto" Padding="24">
+                <!-- Header -->
+                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="Create New Order" 
+                               FontSize="20"
+                               FontAttributes="Bold" 
+                               TextColor="{StaticResource Gray900}"/>
+                        <Label Text="Create a dress order for your customer"
+                               FontSize="14"
+                               TextColor="{StaticResource Gray600}"
+                               LineBreakMode="WordWrap"/>
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1"
+                            Text="✕"
+                            Command="{Binding CloseCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{StaticResource Gray600}"
+                            FontSize="20"
+                            Padding="0"
+                            WidthRequest="32"
+                            HeightRequest="32"
+                            VerticalOptions="Start"/>
+                </Grid>
+
+                <!-- Form -->
+                <ScrollView Grid.Row="1" Margin="0,20,0,0">
+                    <VerticalStackLayout Spacing="16">
+                        <!-- Customer Name -->
+                        <components:InputField Label="Customer Name"
+                                              Text="{Binding CustomerName}"
+                                              Placeholder="e.g., Priya Sharma"
+                                              ErrorMessage="{Binding CustomerNameError}"/>
+
+                        <!-- Dress Type -->
+                        <components:InputField Label="Dress Type"
+                                              Text="{Binding DressType}"
+                                              Placeholder="e.g., Kurti, Saree Blouse, Shirt"
+                                              ErrorMessage="{Binding DressTypeError}"/>
+
+                        <!-- Select Cloth -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Select Cloth" 
+                                   FontSize="14" 
+                                   FontAttributes="Bold" 
+                                   TextColor="{StaticResource Gray700}"/>
+                            <Picker ItemsSource="{Binding Cloths}" 
+                                    ItemDisplayBinding="{Binding DisplayText}"
+                                    SelectedItem="{Binding SelectedCloth}"
+                                    BackgroundColor="{StaticResource White}"
+                                    TextColor="{StaticResource Gray900}"/>
+                            <Label Text="{Binding ClothError}" 
+                                   FontSize="12"
+                                   TextColor="{StaticResource Orange600}"
+                                   IsVisible="{Binding HasClothError}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Selected Cloth Info -->
+                        <Border BackgroundColor="{StaticResource Gray50}"
+                                StrokeThickness="1"
+                                Stroke="{StaticResource Gray200}"
+                                Padding="12"
+                                IsVisible="{Binding HasSelectedCloth}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto" RowSpacing="4">
+                                <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8">
+                                    <BoxView WidthRequest="12" 
+                                             HeightRequest="12" 
+                                             CornerRadius="6"
+                                             BackgroundColor="{Binding SelectedClothColor}"
+                                             VerticalOptions="Center"/>
+                                    <Label Text="{Binding SelectedClothInfo}" 
+                                           FontSize="14"
+                                           TextColor="{StaticResource Gray900}"/>
+                                </HorizontalStackLayout>
+                                <Label Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding SelectedClothPrice, StringFormat='₹{0}/m'}" 
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Gray900}"/>
+                                <Label Grid.Row="1" Grid.Column="0"
+                                       Text="{Binding SelectedClothStock, StringFormat='Available: {0}m'}" 
+                                       FontSize="12"
+                                       TextColor="{StaticResource Gray600}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Meters Used -->
+                        <components:InputField Label="Meters Used"
+                                              Text="{Binding MetersUsed}"
+                                              Placeholder="e.g., 2.5"
+                                              Keyboard="Numeric"
+                                              ErrorMessage="{Binding MetersError}"
+                                              HelperText="{Binding MetersHelper}"/>
+
+                        <!-- Assign Maker -->
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Assign to Maker (Optional)" 
+                                   FontSize="14" 
+                                   FontAttributes="Bold" 
+                                   TextColor="{StaticResource Gray700}"/>
+                            <Picker ItemsSource="{Binding Makers}" 
+                                    SelectedItem="{Binding SelectedMaker}"
+                                    BackgroundColor="{StaticResource White}"
+                                    TextColor="{StaticResource Gray900}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Cost Preview -->
+                        <Border BackgroundColor="{StaticResource Purple50}"
+                                StrokeThickness="1"
+                                Stroke="{StaticResource Purple200}"
+                                Padding="16"
+                                IsVisible="{Binding HasCostPreview}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0"
+                                       Text="Estimated Cost" 
+                                       FontSize="14"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Purple900}"/>
+                                <Label Grid.Column="1"
+                                       Text="{Binding EstimatedCost, StringFormat='₹{0:N0}'}" 
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Purple900}"/>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <!-- Action Button -->
+                <components:ActionButton Grid.Row="2"
+                                        Text="Create Order"
+                                        Variant="Primary"
+                                        Command="{Binding CreateOrderCommand}"
+                                        Margin="0,20,0,0"/>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

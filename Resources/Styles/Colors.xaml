@@ -65,31 +65,16 @@
     <Color x:Key="White">#ffffff</Color>
     <Color x:Key="Black">#000000</Color>
 
-    <!-- Brushes -->
-    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
-    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
-    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
-    <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
-    <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
-
-    <SolidColorBrush x:Key="Gray50Brush" Color="{StaticResource Gray50}"/>
-    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
-    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
-    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}"/>
-    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}"/>
-    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}"/>
-    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}"/>
-    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}"/>
-
     <!-- Gradients -->
-    <LinearGradientBrush x:Key="PurplePinkGradient" StartPoint="0,0" EndPoint="1,0">
-        <GradientStop Color="{StaticResource Purple600}" Offset="0.0" />
-        <GradientStop Color="{StaticResource Pink600}" Offset="1.0" />
+    <LinearGradientBrush x:Key="PurplePinkGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#a855f7" Offset="0.0" />
+        <GradientStop Color="#ec4899" Offset="0.5" />
+        <GradientStop Color="#f97316" Offset="1.0" />
     </LinearGradientBrush>
 
-    <LinearGradientBrush x:Key="PurplePinkVerticalGradient" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="{StaticResource Purple600}" Offset="0.0" />
-        <GradientStop Color="{StaticResource Pink500}" Offset="0.5" />
-        <GradientStop Color="{StaticResource Orange500}" Offset="1.0" />
-    </LinearGradientBrush>
+    <!-- Missing Colors -->
+    <Color x:Key="Gray950">#030712</Color>
+    <Color x:Key="MidnightBlue">#191970</Color>
+    <Color x:Key="OffBlack">#0F0F0F</Color>
+    <Color x:Key="Magenta">#FF00FF</Color>
 </ResourceDictionary>

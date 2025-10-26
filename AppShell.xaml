@@ -7,55 +7,26 @@
     Title="OMS"
     Shell.FlyoutBehavior="Disabled">
 
-    <!-- Login Page (no tabs) -->
-    <ShellContent 
-        Route="Login"
-        ContentTemplate="{DataTemplate pages:LoginPage}" 
-        Shell.NavBarIsVisible="False"
-        Shell.TabBarIsVisible="False"/>
-
-    <!-- Main App with Bottom TabBar -->
-    <TabBar Route="Main">
-        <Tab Title="Dashboard" Icon="dashboard.png">
+    <TabBar>
+        <Tab Title="Dashboard"
+             Icon="icon_dashboard.svg">
             <ShellContent 
                 Route="Dashboard"
-                Title="Dashboard"
-                ContentTemplate="{DataTemplate pages:DashboardPage}">
-                <ShellContent.Icon>
-                    <FontImageSource 
-                        Glyph="&#x1F4CA;" 
-                        FontFamily="SegoeUIEmoji"
-                        Color="{StaticResource Gray500}"/>
-                </ShellContent.Icon>
-            </ShellContent>
+                ContentTemplate="{DataTemplate pages:DashboardPage}" />
         </Tab>
 
-        <Tab Title="Inventory" Icon="package.png">
+        <Tab Title="Inventory"
+             Icon="icon_inventory.svg">
             <ShellContent 
                 Route="ClothInventory"
-                Title="Inventory"
-                ContentTemplate="{DataTemplate pages:ClothInventoryPage}">
-                <ShellContent.Icon>
-                    <FontImageSource 
-                        Glyph="&#x1F4E6;" 
-                        FontFamily="SegoeUIEmoji"
-                        Color="{StaticResource Gray500}"/>
-                </ShellContent.Icon>
-            </ShellContent>
+                ContentTemplate="{DataTemplate pages:ClothInventoryPage}" />
         </Tab>
-
-        <Tab Title="Orders" Icon="orders.png">
+        
+        <Tab Title="Orders"
+             Icon="icon_orders.svg">
             <ShellContent 
                 Route="DressOrders"
-                Title="Orders"
-                ContentTemplate="{DataTemplate pages:DressOrdersPage}">
-                <ShellContent.Icon>
-                    <FontImageSource 
-                        Glyph="&#x1F6CD;" 
-                        FontFamily="SegoeUIEmoji"
-                        Color="{StaticResource Gray500}"/>
-                </ShellContent.Icon>
-            </ShellContent>
+                ContentTemplate="{DataTemplate pages:DressOrdersPage}" />
         </Tab>
     </TabBar>
 

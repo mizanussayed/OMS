@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OMS.Models;
+using OMS.Pages;
 using OMS.Services;
 using System.Collections.ObjectModel;
 
@@ -29,15 +30,17 @@ public partial class ClothInventoryViewModel : ObservableObject
     [RelayCommand]
     private async Task ShowAddCloth()
     {
-        // TODO: Open add cloth dialog/sheet
-        if (Application.Current?.Windows.FirstOrDefault()?.Page != null)
+        var dialog = new AddClothDialog
         {
-            await Application.Current.Windows.FirstOrDefault().Page.DisplayAlert("Add Cloth", "Add cloth feature coming soon", "OK");
-        }
+            BindingContext = new AddClothViewModel(_dataService)
+        };
+        await Shell.Current.Navigation.PushModalAsync(dialog);
+        
+        await Task.Delay(500);
+        LoadData();
     }
 }
 
-// ViewModel wrapper for Cloth items with UI-specific properties
 public class ClothInventoryItemViewModel : ObservableObject
 {
     private readonly Cloth _cloth;
@@ -58,6 +61,20 @@ public class ClothInventoryItemViewModel : ObservableObject
     public decimal UsedMeters => TotalMeters - RemainingMeters;
     public decimal TotalValue => RemainingMeters * PricePerMeter;
     public double StockPercent => (double)(RemainingMeters / TotalMeters * 100);
-    public double StockProgressWidth => StockPercent * 3; // Adjust multiplier as needed
     public bool IsLowStock => RemainingMeters < TotalMeters * 0.2m;
+    
+    // Progress bar width (in device-independent units for the UI)
+    public double ProgressWidth => StockPercent * 2.5; // Adjust multiplier based on container width
+    
+    // Progress bar color based on stock level
+    public Microsoft.Maui.Graphics.Color ProgressColor
+    {
+        get
+        {
+            if (IsLowStock)
+                return Microsoft.Maui.Graphics.Color.FromArgb("#ea580c"); // Orange for low stock
+            else
+                return Microsoft.Maui.Graphics.Color.FromArgb("#9333ea"); // Purple for normal stock
+        }
+    }
 }

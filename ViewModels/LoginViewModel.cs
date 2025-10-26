@@ -1,18 +1,28 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using OMS.Models;
-
+using OMS.Pages;
+using OMS.Services;
+using System.Collections.ObjectModel;
 namespace OMS.ViewModels;
 
-public class LoginViewModel : INotifyPropertyChanged
+public partial class LoginViewModel : ObservableObject
 {
-    private bool _isAdminSelected = true;
-    private bool _isMakerSelected;
-    private string _selectedMaker = "Rajesh Kumar";
+    private readonly IDataService _dataService;
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    [ObservableProperty]
+    private bool isAdminSelected = true;
+
+    [ObservableProperty]
+    private bool isMakerSelected = false;
+
+    [ObservableProperty]
+    private string selectedMaker = "Rajesh Kumar";
+
+    public LoginViewModel(IDataService dataService)
+    {
+        _dataService = dataService;
+    }
 
     public ObservableCollection<string> Makers { get; } = new()
     {
@@ -21,56 +31,53 @@ public class LoginViewModel : INotifyPropertyChanged
         "Suresh Singh"
     };
 
-    public bool IsAdminSelected
+    public string SignInButtonText => IsAdminSelected ? "→  Sign In as Admin" : "→  Sign In as Maker";
+
+    // Admin role styling
+    public Color AdminBorderColor => IsAdminSelected 
+        ? Microsoft.Maui.Graphics.Color.FromArgb("#9333ea") 
+        : Microsoft.Maui.Graphics.Color.FromArgb("#e5e7eb");
+    
+    public Color AdminBackgroundColor => IsAdminSelected 
+        ? Microsoft.Maui.Graphics.Color.FromArgb("#f5f3ff") 
+        : Microsoft.Maui.Graphics.Color.FromArgb("#ffffff");
+
+    // Maker role styling
+    public Color MakerBorderColor => IsMakerSelected 
+        ? Microsoft.Maui.Graphics.Color.FromArgb("#9333ea") 
+        : Microsoft.Maui.Graphics.Color.FromArgb("#e5e7eb");
+    
+    public Color MakerBackgroundColor => IsMakerSelected 
+        ? Microsoft.Maui.Graphics.Color.FromArgb("#f5f3ff") 
+        : Microsoft.Maui.Graphics.Color.FromArgb("#ffffff");
+
+    partial void OnIsAdminSelectedChanged(bool value)
     {
-        get => _isAdminSelected;
-        set
+        if (value)
         {
-            if (_isAdminSelected != value)
-            {
-                _isAdminSelected = value;
-                OnPropertyChanged();
-                if (value)
-                {
-                    IsMakerSelected = false;
-                }
-            }
+            IsMakerSelected = false;
         }
+        OnPropertyChanged(nameof(SignInButtonText));
+        OnPropertyChanged(nameof(AdminBorderColor));
+        OnPropertyChanged(nameof(AdminBackgroundColor));
+        OnPropertyChanged(nameof(MakerBorderColor));
+        OnPropertyChanged(nameof(MakerBackgroundColor));
     }
 
-    public bool IsMakerSelected
+    partial void OnIsMakerSelectedChanged(bool value)
     {
-        get => _isMakerSelected;
-        set
+        if (value)
         {
-            if (_isMakerSelected != value)
-            {
-                _isMakerSelected = value;
-                OnPropertyChanged();
-                if (value)
-                {
-                    IsAdminSelected = false;
-                }
-            }
+            IsAdminSelected = false;
         }
+        OnPropertyChanged(nameof(SignInButtonText));
+        OnPropertyChanged(nameof(AdminBorderColor));
+        OnPropertyChanged(nameof(AdminBackgroundColor));
+        OnPropertyChanged(nameof(MakerBorderColor));
+        OnPropertyChanged(nameof(MakerBackgroundColor));
     }
 
-    public string SelectedMaker
-    {
-        get => _selectedMaker;
-        set
-        {
-            if (_selectedMaker != value)
-            {
-                _selectedMaker = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public ICommand SelectRoleCommand => new Command<string>(SelectRole);
-    public ICommand LoginCommand => new Command(async () => await Login());
-
+    [RelayCommand]
     private void SelectRole(string role)
     {
         if (role == "admin")
@@ -83,6 +90,7 @@ public class LoginViewModel : INotifyPropertyChanged
         }
     }
 
+    [RelayCommand]
     private async Task Login()
     {
         var user = new User(
@@ -91,11 +99,23 @@ public class LoginViewModel : INotifyPropertyChanged
             Role: IsAdminSelected ? UserRole.Admin : UserRole.Maker
         );
 
-        // Store current user
         App.CurrentUser = user;
 
-        // Navigate to main shell
-        await Shell.Current.GoToAsync("//Dashboard");
+        if (user.Role == UserRole.Maker)
+        {
+            var page = new MakerWorkspacePage
+            {
+                BindingContext = new MakerWorkspaceViewModel(_dataService, user.Id, user.Name)
+            };
+            if (Shell.Current != null)
+            {
+                await Shell.Current.Navigation.PushAsync(page);
+            }
+        }
+        else
+        {
+            App.SwitchToAppShell();
+        }
     }
 
     private string GetMakerId(string makerName)
@@ -107,10 +127,5 @@ public class LoginViewModel : INotifyPropertyChanged
             "Suresh Singh" => "maker-3",
             _ => "maker-1"
         };
-    }
-
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
