@@ -10,12 +10,7 @@
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <converters:BoolToColorConverter x:Key="BoolToColorConverter" TrueColor="{StaticResource Primary}" FalseColor="{StaticResource Gray200}" />
-            <converters:StringEqualsConverter x:Key="StringEqualsConverter" />
-            <converters:DivideConverter x:Key="DivideConverter" />
             <converters:ColorConverter x:Key="ColorConverter" />
-            <converters:StatusColorConverter x:Key="StatusColorConverter" />
-            <converters:StatusVisibilityConverter x:Key="StatusVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

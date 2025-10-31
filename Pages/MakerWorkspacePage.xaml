@@ -73,7 +73,7 @@
                 <!-- Orders Collection -->
                 <CollectionView ItemsSource="{Binding Orders}">
                     <CollectionView.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:DressOrderItemViewModel">
                             <Border Padding="16" 
                                     StrokeThickness="1"
                                     Stroke="{StaticResource Gray100}"

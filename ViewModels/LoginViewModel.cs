@@ -62,10 +62,10 @@ public partial class LoginViewModel(IDataService dataService, IAlert alertServic
 
     private async Task Login()
     {
-        SignInButtonText = "Signing In...";
-
         try
         {
+            SignInButtonText = "Signing In...";
+
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
                 await alertService.DisplayAlert("Error", "Please enter username and password", "OK");
@@ -74,7 +74,8 @@ public partial class LoginViewModel(IDataService dataService, IAlert alertServic
 
             if (IsAdminSelected)
             {
-                if (Username == "admin" && Password == "admin")
+                if (Username.Trim().Equals("admin", StringComparison.OrdinalIgnoreCase) &&
+                    Password.Trim() == "admin")
                 {
                     var adminUser = new User(
                         Id: 1,
@@ -82,20 +83,22 @@ public partial class LoginViewModel(IDataService dataService, IAlert alertServic
                         Role: UserRole.Admin
                     );
                     App.CurrentUser = adminUser;
-                    
+
+                    // Small delay to ensure user is set
+                    await Task.Delay(100);
                     App.SwitchToAppShell();
-                    return;
                 }
                 else
                 {
                     await alertService.DisplayAlert("Error", "Invalid admin credentials", "OK");
-                    return;
                 }
             }
             else
             {
                 var employees = await dataService.GetEmployeesAsync();
-                var employee = employees.FirstOrDefault(e => e.Username == Username && e.Password == Password);
+                var employee = employees.FirstOrDefault(e =>
+                    e.Username.Equals(Username.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    e.Password == Password.Trim());
 
                 if (employee == null)
                 {
@@ -111,20 +114,55 @@ public partial class LoginViewModel(IDataService dataService, IAlert alertServic
 
                 App.CurrentUser = loggedInUser;
 
-                var parameters = new Dictionary<string, object>
-                {
-                    { "userId", loggedInUser.Id },
-                    { "userName", loggedInUser.Name }
-                };
-
-                App.SwitchToAppShell();
+                // Small delay to ensure user is set
                 await Task.Delay(100);
-                await Shell.Current.GoToAsync("//MakerWorkspacePage", parameters);
+                App.SwitchToAppShell();
+
+                // Wait for shell to initialize before navigation
+                await Task.Delay(600);
+
+                // Navigate on main thread
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    try
+                    {
+                        if (Shell.Current != null)
+                        {
+                            await Shell.Current.GoToAsync("//MakerWorkspacePage");
+                        }
+                    }
+                    catch (Exception navEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Navigation error: {navEx.Message}");
+                        // Navigation failed but app should stay on dashboard
+                    }
+                });
             }
         }
-        catch
+        catch (Exception ex)
         {
-            await alertService.DisplayAlert("Error", "An error occurred during login. Please try again.", "OK");
+            System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+
+            var errorMessage = "An error occurred during login. Please try again.";
+
+            if (ex.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
+            }
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                try
+                {
+                    await alertService.DisplayAlert("Error", errorMessage, "OK");
+                }
+                catch
+                {
+                    // If alert fails, just log it
+                    System.Diagnostics.Debug.WriteLine("Failed to display error alert");
+                }
+            });
         }
         finally
         {
