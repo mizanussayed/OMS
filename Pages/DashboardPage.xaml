@@ -154,7 +154,7 @@
                 <!-- Cloth Inventory List -->
                 <CollectionView ItemsSource="{Binding Cloths}">
                     <CollectionView.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:ClothViewModel">
                             <Border Padding="16" 
                                     StrokeThickness="0"
                                     BackgroundColor="{StaticResource White}"

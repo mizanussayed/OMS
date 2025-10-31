@@ -4,22 +4,24 @@ namespace OMS.Pages;
 
 public partial class DashboardPage : ContentPage
 {
+    private readonly DashboardViewModel _viewModel;
+
     public DashboardPage(DashboardViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = viewModel;
-        
-        // Set status bar color to match gradient header
+        _viewModel = viewModel;
+        BindingContext = _viewModel;
         SetStatusBarColor();
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
         SetStatusBarColor();
+        await _viewModel.LoadDataCommand.ExecuteAsync(null);
     }
 
-    private void SetStatusBarColor()
+    private static void SetStatusBarColor()
     {
         if (Platform.CurrentActivity?.Window != null)
         {

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using OMS.Pages;
+﻿using OMS.Pages;
 using OMS.Services;
 using OMS.ViewModels;
 
@@ -40,10 +39,6 @@ namespace OMS
             builder.Services.AddTransient<NewOrderDialog>();
             builder.Services.AddTransient<MakerWorkspacePage>();
             builder.Services.AddTransient<AddMakerDialog>();
-
-#if DEBUG
-    		builder.Logging.AddDebug();
-#endif
 
             return builder.Build();
         }

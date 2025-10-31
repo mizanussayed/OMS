@@ -6,24 +6,23 @@ using System.Collections.ObjectModel;
 
 namespace OMS.ViewModels;
 
-public partial class ClothPickerItem : ObservableObject
+public partial class ClothPickerItem(Cloth cloth) : ObservableObject
 {
-    public Cloth Cloth { get; }
+    public Cloth Cloth { get; } = cloth;
     public string DisplayText => $"{Cloth.Name} - {Cloth.Color}";
-
-    public ClothPickerItem(Cloth cloth)
-    {
-        Cloth = cloth;
-    }
 }
 
 public partial class NewOrderViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
+
     private readonly IAlert _alertService;
 
     [ObservableProperty]
     private string customerName = string.Empty;
+
+    [ObservableProperty]
+    private string mobileNumber = string.Empty;
 
     [ObservableProperty]
     private string dressType = string.Empty;
@@ -155,7 +154,7 @@ public partial class NewOrderViewModel : ObservableObject
         }
     }
 
-    private Color GetColorFromName(string colorName)
+    private static Color GetColorFromName(string colorName)
     {
         return colorName.ToLower() switch
         {
@@ -177,7 +176,6 @@ public partial class NewOrderViewModel : ObservableObject
     [RelayCommand]
     private async Task CreateOrder()
     {
-        // Validate
         var isValid = true;
 
         if (string.IsNullOrWhiteSpace(CustomerName))
@@ -214,23 +212,31 @@ public partial class NewOrderViewModel : ObservableObject
 
         double.TryParse(MetersUsed, out var metersValue);
 
-        // Create new order
-        var order = new DressOrder
+        try
         {
-            CustomerName = CustomerName,
-            MobileNumber = "", // Assuming optional
-            DressType = DressType,
-            ClothId = SelectedCloth!.Cloth.Id,
-            MetersUsed = metersValue,
-            Status = DressOrderStatus.Pending,
-            AssignedTo = SelectedMaker??0,
-            OrderDate = DateTime.Now
-        };
+            var order = new DressOrder
+            {
+                CustomerName = CustomerName,
+                MobileNumber = MobileNumber,
+                DressType = DressType,
+                ClothId = SelectedCloth!.Cloth.Id,
+                MetersUsed = metersValue,
+                Status = DressOrderStatus.Pending,
+                AssignedTo = SelectedMaker ?? 0,
+                OrderDate = DateTime.Now
+            };
 
-        await _dataService.AddOrderAsync(order);
+            await _dataService.AddOrderAsync(order);
 
-        // Close dialog
-        await Close();
+            await _alertService.DisplayAlert("Success", "Order created successfully", "OK");
+
+            // Close dialog
+            await Close();
+        }
+        catch (Exception ex)
+        {
+            await _alertService.DisplayAlert("Error", "Failed to create order. Please try again.", "OK");
+        }
     }
 
     [RelayCommand]

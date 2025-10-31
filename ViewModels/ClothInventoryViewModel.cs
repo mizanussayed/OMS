@@ -7,18 +7,10 @@ using System.Collections.ObjectModel;
 
 namespace OMS.ViewModels;
 
-public partial class ClothInventoryViewModel : ObservableObject
+public partial class ClothInventoryViewModel(IDataService dataService) : ObservableObject
 {
-    private readonly IDataService _dataService;
-
-    public ClothInventoryViewModel(IDataService dataService)
-    {
-        _dataService = dataService;
-         _ =LoadDataAsync();
-    }
-
     [ObservableProperty]
-    private ObservableCollection<ClothInventoryItemViewModel> cloths = new();
+    private ObservableCollection<ClothInventoryItemViewModel> cloths = [];
 
 
     [ObservableProperty]
@@ -31,7 +23,7 @@ public partial class ClothInventoryViewModel : ObservableObject
     public async Task LoadDataAsync()
     {
         IsRefreshing = true;
-        var clothsList = await _dataService.GetClothsAsync();
+        var clothsList = await dataService.GetClothsAsync();
         var clothViewModels = clothsList.Select(c => new ClothInventoryItemViewModel(c)).ToList();
         Cloths = new ObservableCollection<ClothInventoryItemViewModel>(clothViewModels);
         HasNoCloth = !Cloths.Any();
@@ -43,38 +35,30 @@ public partial class ClothInventoryViewModel : ObservableObject
     {
         var dialog = new AddClothDialog
         {
-            BindingContext = new AddClothViewModel(_dataService)
+            BindingContext = new AddClothViewModel(dataService)
         };
         await Shell.Current.Navigation.PushModalAsync(dialog);
-        
-        await Task.Delay(500);
+
         await LoadDataAsync();
     }
 }
 
-public class ClothInventoryItemViewModel : ObservableObject
+public class ClothInventoryItemViewModel(Cloth cloth) : ObservableObject
 {
-    private readonly Cloth _cloth;
-
-    public ClothInventoryItemViewModel(Cloth cloth)
-    {
-        _cloth = cloth;
-    }
-
-    public int Id => _cloth.Id;
-    public string Name => _cloth.Name;
-    public string Color => _cloth.Color;
-    public double PricePerMeter => _cloth.PricePerMeter;
-    public double TotalMeters => _cloth.TotalMeters;
-    public double RemainingMeters => _cloth.RemainingMeters;
-    public DateTime AddedDate => _cloth.AddedDate;
+    public int Id => cloth.Id;
+    public string Name => cloth.Name;
+    public string Color => cloth.Color;
+    public double PricePerMeter => cloth.PricePerMeter;
+    public double TotalMeters => cloth.TotalMeters;
+    public double RemainingMeters => cloth.RemainingMeters;
+    public DateTime AddedDate => cloth.AddedDate;
 
     public double UsedMeters => TotalMeters - RemainingMeters;
     public double TotalValue => RemainingMeters * PricePerMeter;
-    public double StockPercent => (RemainingMeters / TotalMeters * 100);
+    public double UsagePercent => ((TotalMeters - RemainingMeters) / TotalMeters * 100);
     public bool IsLowStock => RemainingMeters < TotalMeters * 0.2;
-    public double ProgressWidth => StockPercent * 2.5; // Adjust multiplier based on container width
-    
+    public double ProgressWidth => UsagePercent * 2.5; // Changed from StockPercent to UsagePercent
+
     public Color ProgressColor
     {
         get

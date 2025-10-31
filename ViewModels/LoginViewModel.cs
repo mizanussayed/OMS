@@ -1,22 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using OMS.Models;
-using OMS.Pages;
 using OMS.Services;
 using System.Windows.Input;
 
 namespace OMS.ViewModels;
 
-public partial class LoginViewModel : ObservableObject
+public partial class LoginViewModel(IDataService dataService, IAlert alertService) : ObservableObject
 {
-    private readonly IDataService _dataService;
-    private readonly IAlert _alertService;
-
-    public LoginViewModel(IDataService dataService, IAlert alertService)
-    {
-        _dataService = dataService;
-        _alertService = alertService;
-    }
-
     private bool _isAdminSelected = true;
     private bool _isMakerSelected;
     private string _username = string.Empty;
@@ -78,7 +68,7 @@ public partial class LoginViewModel : ObservableObject
         {
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                await _alertService.DisplayAlert("Error", "Please enter username and password", "OK");
+                await alertService.DisplayAlert("Error", "Please enter username and password", "OK");
                 return;
             }
 
@@ -98,18 +88,18 @@ public partial class LoginViewModel : ObservableObject
                 }
                 else
                 {
-                    await _alertService.DisplayAlert("Error", "Invalid admin credentials", "OK");
+                    await alertService.DisplayAlert("Error", "Invalid admin credentials", "OK");
                     return;
                 }
             }
             else
             {
-                var employees = await _dataService.GetEmployeesAsync();
+                var employees = await dataService.GetEmployeesAsync();
                 var employee = employees.FirstOrDefault(e => e.Username == Username && e.Password == Password);
 
                 if (employee == null)
                 {
-                    await _alertService.DisplayAlert("Error", "Invalid username or password", "OK");
+                    await alertService.DisplayAlert("Error", "Invalid username or password", "OK");
                     return;
                 }
 
@@ -132,9 +122,9 @@ public partial class LoginViewModel : ObservableObject
                 await Shell.Current.GoToAsync("//MakerWorkspacePage", parameters);
             }
         }
-        catch(Exception ex)
+        catch
         {
-            await _alertService.DisplayAlert("Error", "An error occurred during login. Please try again.", "OK");
+            await alertService.DisplayAlert("Error", "An error occurred during login. Please try again.", "OK");
         }
         finally
         {

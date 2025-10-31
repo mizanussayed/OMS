@@ -7,18 +7,8 @@ using System.Collections.ObjectModel;
 
 namespace OMS.ViewModels;
 
-public partial class DressOrdersViewModel : ObservableObject
+public partial class DressOrdersViewModel(IDataService dataService, IAlert alertService) : ObservableObject
 {
-    private readonly IDataService _dataService;
-    private readonly IAlert _alertService;
-
-    public DressOrdersViewModel(IDataService dataService, IAlert alertService)
-    {
-        _dataService = dataService;
-        _alertService = alertService;
-        _ = LoadDataAsync();
-    }
-
     [ObservableProperty]
     private ObservableCollection<DressOrderItemViewModel> orders = new();
 
@@ -29,16 +19,16 @@ public partial class DressOrdersViewModel : ObservableObject
     private bool isRefreshing;
 
     [RelayCommand]
-    public async Task LoadDataAsync()
+    private async Task LoadDataAsync()
     {
         IsRefreshing = true;
-        var ordersList = await _dataService.GetOrdersAsync();
-        var clothsList = await _dataService.GetClothsAsync();
+        var ordersList = await dataService.GetOrdersAsync();
+        var clothsList = await dataService.GetClothsAsync();
         
         var orderViewModels = ordersList.Select(o => 
         {
             var cloth = clothsList.FirstOrDefault(c => c.Id == o.ClothId);
-            return new DressOrderItemViewModel(o, cloth, _dataService);
+            return new DressOrderItemViewModel(o, cloth, dataService);
         }).ToList();
         
         Orders = new ObservableCollection<DressOrderItemViewModel>(orderViewModels);
@@ -51,11 +41,10 @@ public partial class DressOrdersViewModel : ObservableObject
     {
         var dialog = new NewOrderDialog
         {
-            BindingContext = new NewOrderViewModel(_dataService, _alertService)
+            BindingContext = new NewOrderViewModel(dataService, alertService)
         };
         await Shell.Current.Navigation.PushModalAsync(dialog);
-        
-        await Task.Delay(500);
+  
         await LoadDataAsync();
     }
 }

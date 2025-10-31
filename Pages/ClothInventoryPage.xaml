@@ -25,7 +25,7 @@
             <VerticalStackLayout Padding="16" Spacing="12">
                 <CollectionView ItemsSource="{Binding Cloths}">
                     <CollectionView.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:ClothInventoryItemViewModel">
                             <Border Padding="16" 
                                     StrokeThickness="0"
                                     BackgroundColor="{StaticResource White}"

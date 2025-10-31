@@ -7,20 +7,10 @@ using System.Collections.ObjectModel;
 
 namespace OMS.ViewModels;
 
-public partial class DashboardViewModel : ObservableObject
+public partial class DashboardViewModel(IDataService dataService, IAlert alertService) : ObservableObject
 {
-    private readonly IDataService _dataService;
-    private readonly IAlert _alertService;
-
-    public DashboardViewModel(IDataService dataService, IAlert alertService)
-    {
-        _dataService = dataService;
-        _alertService = alertService;
-        LoadData();
-    }
-
     [ObservableProperty]
-    private ObservableCollection<ClothViewModel> cloths = new();
+    private ObservableCollection<ClothViewModel> cloths = [];
 
     [ObservableProperty]
     private int totalCloths;
@@ -32,7 +22,7 @@ public partial class DashboardViewModel : ObservableObject
     private double inventoryValue;
 
     [ObservableProperty]
-    private ObservableCollection<Cloth> lowStockCloths = new();
+    private ObservableCollection<Cloth> lowStockCloths = [];
 
     [ObservableProperty]
     private bool hasLowStockItems;
@@ -40,9 +30,10 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private string userRoleDescription = "Admin Dashboard";
 
-    private async void LoadData()
+    [RelayCommand]
+    public async Task LoadDataAsync()
     {
-        var clothsList = await _dataService.GetClothsAsync();
+        var clothsList = await dataService.GetClothsAsync();
         
         var clothViewModels = clothsList.Select(c => new ClothViewModel(c)).ToList();
         Cloths = new ObservableCollection<ClothViewModel>(clothViewModels);
@@ -50,7 +41,7 @@ public partial class DashboardViewModel : ObservableObject
         TotalCloths = clothsList.Count;
         InventoryValue = clothsList.Sum(c => c.RemainingMeters * c.PricePerMeter);
 
-        var orders = await _dataService.GetOrdersAsync();
+        var orders = await dataService.GetOrdersAsync();
         PendingOrders = orders.Count(o => o.Status == DressOrderStatus.Pending);
 
         LowStockCloths = new ObservableCollection<Cloth>(
@@ -73,7 +64,7 @@ public partial class DashboardViewModel : ObservableObject
 
         if (App.Current?.Windows.Count > 0)
         {
-            var loginPage = new LoginPage(new LoginViewModel(_dataService, _alertService));
+            var loginPage = new LoginPage(new LoginViewModel(dataService, alertService));
             App.Current.Windows[0].Page = new NavigationPage(loginPage);
         }
 
@@ -83,13 +74,11 @@ public partial class DashboardViewModel : ObservableObject
     [RelayCommand]
     private async Task AddMaker()
     {
-        var viewModel = new AddMakerViewModel(_dataService, _alertService);
+        var viewModel = new AddMakerViewModel(dataService, alertService);
         var dialog = new AddMakerDialog(viewModel);
         await Shell.Current.Navigation.PushModalAsync(dialog);
         
-        // Reload data when dialog closes
-        await Task.Delay(500);
-        LoadData();
+        await LoadDataAsync();
     }
 }
 

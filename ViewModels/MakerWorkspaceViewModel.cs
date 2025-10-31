@@ -30,22 +30,22 @@ public partial class MakerWorkspaceViewModel : ObservableObject
         _dataService = dataService;
         _makerId = makerId;
         MakerName = makerName;
-        LoadData();
     }
 
-    private async void LoadData()
+    [RelayCommand]
+    public async Task LoadDataAsync()
     {
         var allOrders = await _dataService.GetOrdersAsync();
         var clothsList = await _dataService.GetClothsAsync();
-        
+
         var myOrders = allOrders.Where(o => o.AssignedTo == _makerId).ToList();
-        
-        var orderViewModels = myOrders.Select(o => 
+
+        var orderViewModels = myOrders.Select(o =>
         {
             var cloth = clothsList.FirstOrDefault(c => c.Id == o.ClothId);
             return new DressOrderItemViewModel(o, cloth, _dataService);
         }).ToList();
-        
+
         Orders = new ObservableCollection<DressOrderItemViewModel>(orderViewModels);
         HasNoOrders = !Orders.Any();
         TotalOrders = Orders.Count;

@@ -52,13 +52,18 @@
                 <!-- Form -->
                 <ScrollView Grid.Row="1" Margin="0,20,0,0">
                     <VerticalStackLayout Spacing="16">
-                        <!-- Customer Name -->
+                        
                         <components:InputField Label="Customer Name"
                                               Text="{Binding CustomerName}"
-                                              Placeholder="e.g., Priya Sharma"
+                                              Placeholder="Enter customer name"
                                               ErrorMessage="{Binding CustomerNameError}"/>
-
-                        <!-- Dress Type -->
+ 
+                        <components:InputField Label="Mobile Number"
+                                              Text="{Binding MobileNumber}"
+                                              Keyboard="Telephone"
+                                              Placeholder="Enter mobile number"
+                                              ErrorMessage="{Binding CustomerNameError}"/>
+                       
                         <components:InputField Label="Dress Type"
                                               Text="{Binding DressType}"
                                               Placeholder="e.g., Kurti, Saree Blouse, Shirt"

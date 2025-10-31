@@ -11,4 +11,5 @@ public interface IDataService
     Task AddOrderAsync(DressOrder order);
     Task AddEmployeeAsync(Employee employee);
     Task UpdateOrderStatusAsync(int orderId, DressOrderStatus status);
+    Task UpdateClothRemainingMetersAsync(int clothId, double metersUsed);
 }

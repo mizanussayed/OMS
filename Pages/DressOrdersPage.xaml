@@ -26,7 +26,7 @@
                 <VerticalStackLayout Padding="16" Spacing="12">
                     <CollectionView ItemsSource="{Binding Orders}">
                         <CollectionView.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="vm:DressOrderItemViewModel">
                                 <Border Padding="16" 
                                         StrokeThickness="1"
                                         Stroke="{StaticResource Gray100}"
@@ -151,8 +151,8 @@
                                                     Text="✓ Complete" 
                                                     FontSize="14"
                                                     FontAttributes="Bold"
-                                                    TextColor="{StaticResource Gray700}"
-                                                    BackgroundColor="{StaticResource White}"
+                                                    TextColor="{StaticResource Primary}"
+                                                    BackgroundColor="{StaticResource Secondary}"
                                                     BorderColor="{StaticResource Gray300}"
                                                     BorderWidth="1"
                                                     Command="{Binding CompleteCommand}"
@@ -165,8 +165,8 @@
                                                     Text="🚚 Deliver" 
                                                     FontSize="14"
                                                     FontAttributes="Bold"
-                                                    TextColor="{StaticResource Gray700}"
-                                                    BackgroundColor="{StaticResource White}"
+                                                    TextColor="{StaticResource Green600}"
+                                                    BackgroundColor="{StaticResource Secondary}"
                                                     BorderColor="{StaticResource Gray300}"
                                                     BorderWidth="1"
                                                     Command="{Binding DeliverCommand}"

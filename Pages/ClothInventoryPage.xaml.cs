@@ -4,17 +4,23 @@ namespace OMS.Pages;
 
 public partial class ClothInventoryPage : ContentPage
 {
+    private readonly ClothInventoryViewModel _viewModel;
+
     public ClothInventoryPage(ClothInventoryViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = viewModel;
+        _viewModel = viewModel;
+        BindingContext = _viewModel;
         SetStatusBarColor();
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
         SetStatusBarColor();
+
+        // Reload data when page appears to reflect any changes
+        await _viewModel.LoadDataCommand.ExecuteAsync(null);
     }
 
     private void SetStatusBarColor()
