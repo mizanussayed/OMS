@@ -19,7 +19,6 @@ public partial class DressOrdersPage : ContentPage
 
     private void SetStatusBarColor()
     {
-#if ANDROID
         if (Platform.CurrentActivity?.Window != null)
         {
             var window = Platform.CurrentActivity.Window;
@@ -28,6 +27,5 @@ public partial class DressOrdersPage : ContentPage
             window.SetNavigationBarColor(Android.Graphics.Color.ParseColor("#ffffff"));
 #pragma warning restore CA1422
         }
-#endif
     }
 }

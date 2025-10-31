@@ -14,17 +14,28 @@ public partial class ClothInventoryViewModel : ObservableObject
     public ClothInventoryViewModel(IDataService dataService)
     {
         _dataService = dataService;
-        LoadData();
+        LoadDataAsync();
     }
 
     [ObservableProperty]
     private ObservableCollection<ClothInventoryItemViewModel> cloths = new();
 
-    private async void LoadData()
+
+    [ObservableProperty]
+    private bool hasNoCloth;
+
+    [ObservableProperty]
+    private bool isRefreshing;
+
+    [RelayCommand]
+    public async Task LoadDataAsync()
     {
+        IsRefreshing = true;
         var clothsList = await _dataService.GetClothsAsync();
         var clothViewModels = clothsList.Select(c => new ClothInventoryItemViewModel(c)).ToList();
         Cloths = new ObservableCollection<ClothInventoryItemViewModel>(clothViewModels);
+        HasNoCloth = !Cloths.Any();
+        IsRefreshing = false;
     }
 
     [RelayCommand]
@@ -37,7 +48,7 @@ public partial class ClothInventoryViewModel : ObservableObject
         await Shell.Current.Navigation.PushModalAsync(dialog);
         
         await Task.Delay(500);
-        LoadData();
+        await LoadDataAsync();
     }
 }
 
@@ -50,24 +61,21 @@ public class ClothInventoryItemViewModel : ObservableObject
         _cloth = cloth;
     }
 
-    public string Id => _cloth.Id;
+    public int Id => _cloth.Id;
     public string Name => _cloth.Name;
     public string Color => _cloth.Color;
-    public decimal PricePerMeter => _cloth.PricePerMeter;
-    public decimal TotalMeters => _cloth.TotalMeters;
-    public decimal RemainingMeters => _cloth.RemainingMeters;
+    public double PricePerMeter => _cloth.PricePerMeter;
+    public double TotalMeters => _cloth.TotalMeters;
+    public double RemainingMeters => _cloth.RemainingMeters;
     public DateTime AddedDate => _cloth.AddedDate;
 
-    public decimal UsedMeters => TotalMeters - RemainingMeters;
-    public decimal TotalValue => RemainingMeters * PricePerMeter;
-    public double StockPercent => (double)(RemainingMeters / TotalMeters * 100);
-    public bool IsLowStock => RemainingMeters < TotalMeters * 0.2m;
-    
-    // Progress bar width (in device-independent units for the UI)
+    public double UsedMeters => TotalMeters - RemainingMeters;
+    public double TotalValue => RemainingMeters * PricePerMeter;
+    public double StockPercent => (RemainingMeters / TotalMeters * 100);
+    public bool IsLowStock => RemainingMeters < TotalMeters * 0.2;
     public double ProgressWidth => StockPercent * 2.5; // Adjust multiplier based on container width
     
-    // Progress bar color based on stock level
-    public Microsoft.Maui.Graphics.Color ProgressColor
+    public Color ProgressColor
     {
         get
         {

@@ -23,8 +23,14 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="Google.Cloud.Firestore" Version="3.11.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+	</ItemGroup>
+	<ItemGroup>
+	  <MauiXaml Update="Pages\AddMakerPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 </Project>

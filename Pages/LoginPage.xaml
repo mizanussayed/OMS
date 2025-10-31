@@ -2,6 +2,7 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:OMS.Components"
     x:Class="OMS.Pages.LoginPage"
     Shell.NavBarIsVisible="False"
     NavigationPage.HasNavigationBar="False"
@@ -66,70 +67,66 @@
                         </VerticalStackLayout>
 
                         <!-- Role Selection -->
-                        <VerticalStackLayout Spacing="8">
-                            <Label Text="Select Role" 
-                                   FontSize="13" 
-                                   FontAttributes="Bold" 
-                                   TextColor="{StaticResource Gray900}"
-                                   Margin="0,0,0,4"/>
-                            
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="5">
                             <!-- Admin Role -->
-                            <Border StrokeThickness="1"
-                                    Stroke="{Binding AdminBorderColor}" 
-                                    BackgroundColor="{Binding AdminBackgroundColor}"
-                                    Padding="16">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="8" />
-                                </Border.StrokeShape>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectRoleCommand}" CommandParameter="admin"/>
-                                </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                    <Ellipse Grid.Column="0"
-                                             WidthRequest="8"
-                                             HeightRequest="8"
-                                             Fill="{StaticResource Gray900}"
-                                             VerticalOptions="Center"/>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                        <Label Text="Admin" 
-                                               FontSize="15" 
-                                               FontAttributes="Bold" 
-                                               TextColor="{StaticResource Gray900}"/>
-                                        <Label Text="Full access to all features" 
-                                               FontSize="12" 
-                                               TextColor="{StaticResource Gray600}"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
+                            <Grid Grid.Column="0" 
+                                  ColumnDefinitions="Auto,*" 
+                                  ColumnSpacing="0"
+                                  BackgroundColor="Transparent">
+                                <RadioButton Grid.Column="0" 
+                                             GroupName="Role" 
+                                             Value="admin" 
+                                             IsChecked="{Binding IsAdminSelected}"/>
+                                <Label Text="Admin" 
+                                       Grid.Column="1" 
+                                       FontSize="14" 
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Gray900}"
+                                       VerticalOptions="Center"/>
+                            </Grid>
 
                             <!-- Maker Role -->
-                            <Border StrokeThickness="1"
-                                    Stroke="{Binding MakerBorderColor}" 
-                                    BackgroundColor="{Binding MakerBackgroundColor}"
-                                    Padding="16">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="8" />
-                                </Border.StrokeShape>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectRoleCommand}" CommandParameter="maker"/>
-                                </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                    <Ellipse Grid.Column="0"
-                                             WidthRequest="8"
-                                             HeightRequest="8"
-                                             Fill="{StaticResource Gray900}"
-                                             VerticalOptions="Center"/>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                        <Label Text="Maker/Tailor" 
-                                               FontSize="15" 
-                                               FontAttributes="Bold" 
-                                               TextColor="{StaticResource Gray900}"/>
-                                        <Label Text="View and update assigned orders" 
-                                               FontSize="12" 
-                                               TextColor="{StaticResource Gray600}"/>
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
+                            <Grid Grid.Column="1" 
+                                  ColumnDefinitions="Auto,*" 
+                                  ColumnSpacing="0"
+                                  BackgroundColor="Transparent">
+                                <RadioButton Grid.Column="0" 
+                                             GroupName="Role" 
+                                             Value="maker" 
+                                             IsChecked="{Binding IsMakerSelected}"/>
+                                <Label Text="Maker/Tailor" 
+                                       Grid.Column="1" 
+                                       FontSize="14" 
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource Gray900}"
+                                       VerticalOptions="Center"/>
+                            </Grid>                            
+                            
+                        </Grid>
+
+                        <!-- Username and Password -->
+                        <VerticalStackLayout Spacing="16">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Username" 
+                                       FontSize="13" 
+                                       TextColor="{StaticResource Gray600}"/>
+                                <Entry Text="{Binding Username}" 
+                                       Placeholder="Enter your username"
+                                       PlaceholderColor="{StaticResource Gray400}"
+                                       BackgroundColor="Transparent"
+                                       FontSize="15"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Password" 
+                                       FontSize="13" 
+                                       TextColor="{StaticResource Gray600}"/>
+                                <Entry Text="{Binding Password}" 
+                                       Placeholder="Enter your password"
+                                       PlaceholderColor="{StaticResource Gray400}"
+                                       IsPassword="True"
+                                       BackgroundColor="Transparent"
+                                       FontSize="15"/>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
 
                         <!-- Login Button -->
@@ -143,25 +140,6 @@
                                 CornerRadius="8"
                                 Margin="0,8,0,0"/>
 
-                        <!-- Demo Info -->
-                        <Border BackgroundColor="{StaticResource Blue50}" 
-                                StrokeThickness="1"
-                                Stroke="{StaticResource Blue200}"
-                                Padding="12">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="8" />
-                            </Border.StrokeShape>
-                            <Label FontSize="11" 
-                                   TextColor="{StaticResource Blue800}"
-                                   LineHeight="1.4">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="Demo Mode: " FontAttributes="Bold"/>
-                                        <Span Text="Select a role to explore different access levels. No password required."/>
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
-                        </Border>
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>

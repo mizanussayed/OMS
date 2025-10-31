@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using OMS.Models;
 using OMS.Services;
 using System.Collections.ObjectModel;
 
@@ -9,7 +8,7 @@ namespace OMS.ViewModels;
 public partial class MakerWorkspaceViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
-    private readonly string _makerId;
+    private readonly int _makerId;
 
     [ObservableProperty]
     private string makerName = string.Empty;
@@ -26,7 +25,7 @@ public partial class MakerWorkspaceViewModel : ObservableObject
     [ObservableProperty]
     private bool hasNoOrders;
 
-    public MakerWorkspaceViewModel(IDataService dataService, string makerId, string makerName)
+    public MakerWorkspaceViewModel(IDataService dataService, int makerId, string makerName)
     {
         _dataService = dataService;
         _makerId = makerId;
@@ -39,7 +38,6 @@ public partial class MakerWorkspaceViewModel : ObservableObject
         var allOrders = await _dataService.GetOrdersAsync();
         var clothsList = await _dataService.GetClothsAsync();
         
-        // Filter orders assigned to this maker
         var myOrders = allOrders.Where(o => o.AssignedTo == _makerId).ToList();
         
         var orderViewModels = myOrders.Select(o => 
@@ -55,12 +53,10 @@ public partial class MakerWorkspaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Logout()
+    private static async Task Logout()
     {
-        // Clear current user
         App.CurrentUser = null;
 
-        // Navigate to login
         await Shell.Current.GoToAsync("//login");
     }
 }

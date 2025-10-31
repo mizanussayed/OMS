@@ -1,7 +1,7 @@
 namespace OMS.Models;
 
 public record User(
-    string Id,
+    int Id,
     string Name,
     UserRole Role
 );

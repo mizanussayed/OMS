@@ -1,41 +1,43 @@
 ﻿using OMS.Models;
 using OMS.Pages;
-using OMS.ViewModels;
-using OMS.Services;
 
-namespace OMS
+namespace OMS;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    public static User? CurrentUser { get; set; }
+    public App()
     {
-        public static User? CurrentUser { get; set; }
+        InitializeComponent();
+        UserAppTheme = AppTheme.Light;
+    }
 
-        public App()
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        if (CurrentUser == null)
         {
-            InitializeComponent();
-            UserAppTheme = AppTheme.Light;
+            return new Window(new AppShell());
         }
-
-        protected override Window CreateWindow(IActivationState? activationState)
+        else
         {
-            // Check if user is already logged in
-            if (CurrentUser != null)
+            var loginPage = Handler?.MauiContext?.Services.GetService<LoginPage>();
+            if (loginPage != null)
             {
-                return new Window(new AppShell());
+                return new Window(new NavigationPage(loginPage));
             }
             else
             {
-                // Start with Login page, then switch to AppShell after login
-                var loginPage = Handler?.MauiContext?.Services.GetService<LoginPage>();
-                return new Window(new NavigationPage(loginPage ?? new LoginPage(new LoginViewModel(new MockDataService()))));
+                // Fallback, but should not happen
+                return new Window(new AppShell());
             }
         }
+    }
 
-        public static void SwitchToAppShell()
+    public static void SwitchToAppShell()
+    {
+        if (Current?.Windows.Count > 0)
         {
-            if (Current?.Windows.Count > 0)
-            {
-                Current.Windows[0].Page = new AppShell();
-            }
+            Current.Windows[0].Page = new AppShell();
         }
     }
 }

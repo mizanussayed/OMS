@@ -27,7 +27,7 @@ public partial class DashboardViewModel : ObservableObject
     private int pendingOrders;
 
     [ObservableProperty]
-    private decimal inventoryValue;
+    private double inventoryValue;
 
     [ObservableProperty]
     private ObservableCollection<Cloth> lowStockCloths = new();
@@ -53,7 +53,7 @@ public partial class DashboardViewModel : ObservableObject
         PendingOrders = orders.Count(o => o.Status == DressOrderStatus.Pending);
 
         LowStockCloths = new ObservableCollection<Cloth>(
-            clothsList.Where(c => c.RemainingMeters < c.TotalMeters * 0.2m)
+            clothsList.Where(c => c.RemainingMeters < c.TotalMeters * 0.2)
         );
         HasLowStockItems = LowStockCloths.Any();
 
@@ -78,6 +78,12 @@ public partial class DashboardViewModel : ObservableObject
             App.Current.Windows[0].Page = new NavigationPage(loginPage);
         }
     }
+
+    [RelayCommand]
+    private async Task AddMaker()
+    {
+        await Shell.Current.GoToAsync("AddMaker");
+    }
 }
 
 public class ClothViewModel : ObservableObject
@@ -89,14 +95,14 @@ public class ClothViewModel : ObservableObject
         _cloth = cloth;
     }
 
-    public string Id => _cloth.Id;
+    public string Id => _cloth.Id.ToString();
     public string Name => _cloth.Name;
     public string Color => _cloth.Color;
-    public decimal PricePerMeter => _cloth.PricePerMeter;
-    public decimal TotalMeters => _cloth.TotalMeters;
-    public decimal RemainingMeters => _cloth.RemainingMeters;
+    public double PricePerMeter => _cloth.PricePerMeter;
+    public double TotalMeters => _cloth.TotalMeters;
+    public double RemainingMeters => _cloth.RemainingMeters;
     public DateTime AddedDate => _cloth.AddedDate;
 
-    public double UsagePercent => (double)((TotalMeters - RemainingMeters) / TotalMeters * 100);
+    public double UsagePercent => ((TotalMeters - RemainingMeters) / TotalMeters * 100);
     public double ProgressWidth => UsagePercent * 3; // Multiply for visual width (adjust as needed)
 }

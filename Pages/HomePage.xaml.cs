@@ -4,10 +4,10 @@ namespace OMS.Pages;
 
 public partial class HomePage : ContentPage
 {
-    public HomePage()
+    public HomePage(HomeViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = new HomeViewModel();
+        BindingContext = viewModel;
     }
 
     protected override async void OnAppearing()

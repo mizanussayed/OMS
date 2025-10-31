@@ -1,131 +1,141 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using OMS.Models;
 using OMS.Pages;
 using OMS.Services;
-using System.Collections.ObjectModel;
+using System.Windows.Input;
+
 namespace OMS.ViewModels;
 
 public partial class LoginViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
 
-    [ObservableProperty]
-    private bool isAdminSelected = true;
-
-    [ObservableProperty]
-    private bool isMakerSelected = false;
-
-    [ObservableProperty]
-    private string selectedMaker = "Rajesh Kumar";
-
     public LoginViewModel(IDataService dataService)
     {
         _dataService = dataService;
     }
 
-    public ObservableCollection<string> Makers { get; } = new()
+    private bool _isAdminSelected = true;
+    private bool _isMakerSelected;
+    private string _username = string.Empty;
+    private string _password = string.Empty;
+
+    public string Username
     {
-        "Rajesh Kumar",
-        "Amit Patel",
-        "Suresh Singh"
-    };
-
-    public string SignInButtonText => IsAdminSelected ? "→  Sign In as Admin" : "→  Sign In as Maker";
-
-    // Admin role styling
-    public Color AdminBorderColor => IsAdminSelected 
-        ? Microsoft.Maui.Graphics.Color.FromArgb("#9333ea") 
-        : Microsoft.Maui.Graphics.Color.FromArgb("#e5e7eb");
-    
-    public Color AdminBackgroundColor => IsAdminSelected 
-        ? Microsoft.Maui.Graphics.Color.FromArgb("#f5f3ff") 
-        : Microsoft.Maui.Graphics.Color.FromArgb("#ffffff");
-
-    // Maker role styling
-    public Color MakerBorderColor => IsMakerSelected 
-        ? Microsoft.Maui.Graphics.Color.FromArgb("#9333ea") 
-        : Microsoft.Maui.Graphics.Color.FromArgb("#e5e7eb");
-    
-    public Color MakerBackgroundColor => IsMakerSelected 
-        ? Microsoft.Maui.Graphics.Color.FromArgb("#f5f3ff") 
-        : Microsoft.Maui.Graphics.Color.FromArgb("#ffffff");
-
-    partial void OnIsAdminSelectedChanged(bool value)
-    {
-        if (value)
-        {
-            IsMakerSelected = false;
-        }
-        OnPropertyChanged(nameof(SignInButtonText));
-        OnPropertyChanged(nameof(AdminBorderColor));
-        OnPropertyChanged(nameof(AdminBackgroundColor));
-        OnPropertyChanged(nameof(MakerBorderColor));
-        OnPropertyChanged(nameof(MakerBackgroundColor));
+        get => _username;
+        set => SetProperty(ref _username, value);
     }
 
-    partial void OnIsMakerSelectedChanged(bool value)
+    public string Password
     {
-        if (value)
-        {
-            IsAdminSelected = false;
-        }
-        OnPropertyChanged(nameof(SignInButtonText));
-        OnPropertyChanged(nameof(AdminBorderColor));
-        OnPropertyChanged(nameof(AdminBackgroundColor));
-        OnPropertyChanged(nameof(MakerBorderColor));
-        OnPropertyChanged(nameof(MakerBackgroundColor));
+        get => _password;
+        set => SetProperty(ref _password, value);
     }
 
-    [RelayCommand]
+    public bool IsAdminSelected
+    {
+        get => _isAdminSelected;
+        set => SetProperty(ref _isAdminSelected, value);
+    }
+
+    public bool IsMakerSelected
+    {
+        get => _isMakerSelected;
+        set => SetProperty(ref _isMakerSelected, value);
+    }
+
+    private string _signInButtonText = "Sign In";
+    public string SignInButtonText
+    {
+        get => _signInButtonText;
+        set => SetProperty(ref _signInButtonText, value);
+    }
+
+    public ICommand SelectRoleCommand => new Command<string>(SelectRole);
+    public ICommand LoginCommand => new Command(async () => await Login());
+
     private void SelectRole(string role)
     {
         if (role == "admin")
         {
             IsAdminSelected = true;
+            IsMakerSelected = false;
         }
         else if (role == "maker")
         {
+            IsAdminSelected = false;
             IsMakerSelected = true;
         }
     }
 
-    [RelayCommand]
     private async Task Login()
     {
-        var user = new User(
-            Id: IsAdminSelected ? "admin-1" : GetMakerId(SelectedMaker),
-            Name: IsAdminSelected ? "Admin User" : SelectedMaker,
-            Role: IsAdminSelected ? UserRole.Admin : UserRole.Maker
-        );
+        SignInButtonText = "Signing In...";
 
-        App.CurrentUser = user;
-
-        if (user.Role == UserRole.Maker)
+        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
         {
-            var page = new MakerWorkspacePage
+            await Application.Current.MainPage.DisplayAlert("Error", "Please enter username and password", "OK");
+            SignInButtonText = "Sign In";
+            return;
+        }
+
+        try
+        {
+            if (IsAdminSelected)
             {
-                BindingContext = new MakerWorkspaceViewModel(_dataService, user.Id, user.Name)
-            };
-            if (Shell.Current != null)
+                if (Username == "admin" && Password == "admin")
+                {
+                    var adminUser = new User(
+                        Id: 1,
+                        Name: "Admin User",
+                        Role: UserRole.Admin
+                    );
+                    App.CurrentUser = adminUser;
+                    await Shell.Current.GoToAsync("//Dashboard");
+                    SignInButtonText = "Sign In";
+                    return;
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error", "Invalid admin credentials", "OK");
+                    SignInButtonText = "Sign In";
+                    return;
+                }
+            }
+            else
             {
+                var employees = await _dataService.GetEmployeesAsync();
+                var employee = employees.FirstOrDefault(e => e.Username == Username && e.Password == Password);
+
+                if (employee == null)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Error", "Invalid username or password", "OK");
+                    SignInButtonText = "Sign In";
+                    return;
+                }
+
+                var loggedInUser = new User(
+                    Id: employee.Id,
+                    Name: employee.Name,
+                    Role: UserRole.Maker
+                );
+
+                App.CurrentUser = loggedInUser;
+
+                var page = new MakerWorkspacePage
+                {
+                    BindingContext = new MakerWorkspaceViewModel(_dataService, loggedInUser.Id, loggedInUser.Name)
+                };
                 await Shell.Current.Navigation.PushAsync(page);
             }
         }
-        else
+        catch
         {
-            App.SwitchToAppShell();
+            await Application.Current.MainPage.DisplayAlert("Error", "An error occurred during login. Please try again.", "OK");
         }
-    }
-
-    private string GetMakerId(string makerName)
-    {
-        return makerName switch
+        finally
         {
-            "Rajesh Kumar" => "maker-1",
-            "Amit Patel" => "maker-2",
-            "Suresh Singh" => "maker-3",
-            _ => "maker-1"
-        };
+            SignInButtonText = "Sign In";
+        }
     }
 }

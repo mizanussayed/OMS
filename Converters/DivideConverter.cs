@@ -6,7 +6,7 @@ public class DivideConverter : IValueConverter
 {
  public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
  {
-  if (value is decimal v && parameter is decimal p && p != 0)
+  if (value is double v && parameter is double p && p != 0)
    return (double)(v / p);
   return 0.0;
  }

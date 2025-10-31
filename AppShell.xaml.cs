@@ -1,11 +1,10 @@
 ﻿using OMS.Pages;
 
-namespace OMS
+namespace OMS;
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
-        {
             InitializeComponent();
             
             Routing.RegisterRoute("Login", typeof(LoginPage));
@@ -13,6 +12,6 @@ namespace OMS
             Routing.RegisterRoute("ClothInventory", typeof(ClothInventoryPage));
             Routing.RegisterRoute("DressOrders", typeof(DressOrdersPage));
             Routing.RegisterRoute("MakerWorkspace", typeof(MakerWorkspacePage));
-        }
+            Routing.RegisterRoute("AddMaker", typeof(AddMakerPage));
     }
 }

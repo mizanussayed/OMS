@@ -5,14 +5,11 @@
     xmlns:components="clr-namespace:OMS.Components"
     x:Class="OMS.Pages.NewOrderDialog"
     BackgroundColor="#80000000">
-    
-    <!-- Semi-transparent overlay -->
     <Grid>
         <Grid.GestureRecognizers>
             <TapGestureRecognizer Command="{Binding CloseCommand}"/>
         </Grid.GestureRecognizers>
         
-        <!-- Bottom Sheet Dialog -->
         <Border BackgroundColor="White"
                 StrokeThickness="0"
                 VerticalOptions="End"

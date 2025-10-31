@@ -138,6 +138,12 @@
                     </Border>
                 </Grid>
 
+                <!-- Add Maker Button -->
+                <components:ActionButton Text="Add New Maker"
+                                        Command="{Binding AddMakerCommand}"
+                                        Variant="Primary"
+                                        HorizontalOptions="Fill"/>
+
                 <!-- Cloth Inventory Section -->
                 <Label Text="Cloth Inventory" 
                        FontSize="16"

@@ -7,19 +7,18 @@
     Title="Inventory"
     BackgroundColor="{StaticResource Gray50}"
     Shell.NavBarIsVisible="False">
-    
     <Grid RowDefinitions="Auto,*">
-        <!-- Gradient Header Component -->
         <components:GradientHeader Grid.Row="0"
-                                  Title="Cloth Inventory"
-                                  Subtitle="Manage your fabric stock"
-                                  ActionButtonIcon="icon_plus.svg"
-                                  ActionButtonText="Add Cloth"
-                                  ShowActionButton="True"
-                                  ActionButtonCommand="{Binding ShowAddClothCommand}"/>
-
+             Title="Cloth Inventory"
+             Subtitle="Manage your fabric stock"
+             ActionButtonIcon="icon_plus.svg"
+             ActionButtonText="Add Cloth"
+             ShowActionButton="True"
+             ActionButtonCommand="{Binding ShowAddClothCommand}"/>
         <!-- Content -->
-        <ScrollView Grid.Row="1">
+        <RefreshView Grid.Row="1"
+                     IsRefreshing="{Binding IsRefreshing}"
+                     Command="{Binding LoadDataCommand}">
             <VerticalStackLayout Padding="16" Spacing="12">
                 <CollectionView ItemsSource="{Binding Cloths}">
                     <CollectionView.ItemTemplate>
@@ -128,7 +127,27 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
+                <Border Padding="32" 
+                        StrokeThickness="1"
+                        Stroke="{StaticResource Gray100}"
+                        BackgroundColor="{StaticResource White}"
+                        IsVisible="{Binding HasNoCloth}">
+                        <Border.StrokeShape>
+                             <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                        <Shadow Brush="{StaticResource Gray900}"
+                                Opacity="0.1"
+                                Radius="8"
+                                Offset="0,2" />
+                        </Border.Shadow>
+                        <Label Text="No cloth yet. Create your first cloth!" 
+                               FontSize="16"
+                               TextColor="{StaticResource Gray500}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                </Border>
             </VerticalStackLayout>
-        </ScrollView>
+        </RefreshView>
     </Grid>
 </ContentPage>

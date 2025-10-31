@@ -73,13 +73,13 @@ public partial class NewOrderViewModel : ObservableObject
     private ObservableCollection<string> makers = new() { "Maker 1", "Maker 2", "Maker 3" };
 
     [ObservableProperty]
-    private string? selectedMaker;
+    private int? selectedMaker;
 
     [ObservableProperty]
     private bool hasCostPreview;
 
     [ObservableProperty]
-    private decimal estimatedCost;
+    private double estimatedCost;
 
     public NewOrderViewModel(IDataService dataService)
     {
@@ -129,7 +129,7 @@ public partial class NewOrderViewModel : ObservableObject
         MetersError = string.Empty;
         MetersHelper = string.Empty;
 
-        if (SelectedCloth != null && decimal.TryParse(value, out var meters))
+        if (SelectedCloth != null && double.TryParse(value, out var meters))
         {
             if (meters > SelectedCloth.Cloth.RemainingMeters)
             {
@@ -142,7 +142,7 @@ public partial class NewOrderViewModel : ObservableObject
 
     private void UpdateCostPreview()
     {
-        if (SelectedCloth != null && decimal.TryParse(MetersUsed, out var meters))
+        if (SelectedCloth != null && double.TryParse(MetersUsed, out var meters))
         {
             EstimatedCost = meters * SelectedCloth.Cloth.PricePerMeter;
             HasCostPreview = true;
@@ -197,7 +197,7 @@ public partial class NewOrderViewModel : ObservableObject
             isValid = false;
         }
 
-        if (string.IsNullOrWhiteSpace(MetersUsed) || !decimal.TryParse(MetersUsed, out var meters) || meters <= 0)
+        if (string.IsNullOrWhiteSpace(MetersUsed) || !double.TryParse(MetersUsed, out var meters) || meters <= 0)
         {
             MetersError = "Valid meters is required";
             isValid = false;
@@ -210,19 +210,20 @@ public partial class NewOrderViewModel : ObservableObject
 
         if (!isValid) return;
 
-        decimal.TryParse(MetersUsed, out var metersValue);
+        double.TryParse(MetersUsed, out var metersValue);
 
         // Create new order
-        var order = new DressOrder(
-            Guid.NewGuid().ToString(),
-            CustomerName,
-            DressType,
-            SelectedCloth!.Cloth.Id,
-            metersValue,
-            DressOrderStatus.Pending,
-            SelectedMaker ?? string.Empty,
-            DateTime.Now
-        );
+        var order = new DressOrder
+        {
+            CustomerName = CustomerName,
+            MobileNumber = "", // Assuming optional
+            DressType = DressType,
+            ClothId = SelectedCloth!.Cloth.Id,
+            MetersUsed = metersValue,
+            Status = DressOrderStatus.Pending,
+            AssignedTo = SelectedMaker??0,
+            OrderDate = DateTime.Now
+        };
 
         await _dataService.AddOrderAsync(order);
 

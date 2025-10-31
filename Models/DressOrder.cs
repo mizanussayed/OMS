@@ -1,15 +1,16 @@
 namespace OMS.Models;
 
-public record DressOrder(
-    string Id,
-    string CustomerName,
-    string DressType,
-    string ClothId,
-    decimal MetersUsed,
-    DressOrderStatus Status,
-    string AssignedTo,
-    DateTime OrderDate
-);
+public sealed class DressOrder {
+    public int Id { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public string MobileNumber { get; set; } = string.Empty;
+    public string DressType { get; set; } = string.Empty;
+    public int ClothId { get; set; }
+    public double MetersUsed { get; set; }
+    public DressOrderStatus Status { get; set; }
+    public int AssignedTo { get; set; } 
+    public DateTime OrderDate { get; set; }
+}
 
 public enum DressOrderStatus
 {

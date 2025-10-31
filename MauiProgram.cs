@@ -19,26 +19,28 @@ namespace OMS
                 });
 
             // Services
-            builder.Services.AddSingleton<IDataService, MockDataService>();
+            builder.Services.AddSingleton<IDataService, FirebaseDataService>();
 
             // ViewModels
-            builder.Services.AddScoped<LoginViewModel>(sp => new LoginViewModel(sp.GetRequiredService<IDataService>()));
-            builder.Services.AddScoped<DashboardViewModel>();
-            builder.Services.AddScoped<ClothInventoryViewModel>();
-            builder.Services.AddScoped<DressOrdersViewModel>();
-            builder.Services.AddScoped<HomeViewModel>();
-            builder.Services.AddScoped<AddClothViewModel>();
-            builder.Services.AddScoped<NewOrderViewModel>();
+            builder.Services.AddTransient<LoginViewModel>(sp => new LoginViewModel(sp.GetRequiredService<IDataService>()));
+            builder.Services.AddTransient<DashboardViewModel>();
+            builder.Services.AddTransient<ClothInventoryViewModel>();
+            builder.Services.AddTransient<DressOrdersViewModel>();
+            builder.Services.AddTransient<HomeViewModel>();
+            builder.Services.AddTransient<AddClothViewModel>();
+            builder.Services.AddTransient<NewOrderViewModel>();
+            builder.Services.AddTransient<AddMakerViewModel>();
 
             // Pages
-            builder.Services.AddScoped<LoginPage>();
-            builder.Services.AddScoped<DashboardPage>();
-            builder.Services.AddScoped<ClothInventoryPage>();
-            builder.Services.AddScoped<DressOrdersPage>();
-            builder.Services.AddScoped<HomePage>();
-            builder.Services.AddScoped<AddClothDialog>();
-            builder.Services.AddScoped<NewOrderDialog>();
-            builder.Services.AddScoped<MakerWorkspacePage>();
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<DashboardPage>();
+            builder.Services.AddTransient<ClothInventoryPage>();
+            builder.Services.AddTransient<DressOrdersPage>();
+            builder.Services.AddTransient<HomePage>();
+            builder.Services.AddTransient<AddClothDialog>();
+            builder.Services.AddTransient<NewOrderDialog>();
+            builder.Services.AddTransient<MakerWorkspacePage>();
+            builder.Services.AddTransient<AddMakerPage>();
 
 #if DEBUG
     		builder.Logging.AddDebug();

@@ -11,9 +11,9 @@ public partial class HomeViewModel : ObservableObject
 {
  private readonly IDataService _dataService;
 
- public HomeViewModel()
+ public HomeViewModel(IDataService dataService)
  {
-  _dataService = new MockDataService();
+  _dataService = dataService;
  }
 
  [ObservableProperty]

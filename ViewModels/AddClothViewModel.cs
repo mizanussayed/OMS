@@ -5,10 +5,8 @@ using OMS.Services;
 
 namespace OMS.ViewModels;
 
-public partial class AddClothViewModel : ObservableObject
+public partial class AddClothViewModel(IDataService dataService) : ObservableObject
 {
-    private readonly IDataService _dataService;
-
     [ObservableProperty]
     private string name = string.Empty;
 
@@ -50,11 +48,6 @@ public partial class AddClothViewModel : ObservableObject
 
     [ObservableProperty]
     private string previewValue = string.Empty;
-
-    public AddClothViewModel(IDataService dataService)
-    {
-        _dataService = dataService;
-    }
 
     partial void OnNameChanged(string value)
     {
@@ -105,7 +98,7 @@ public partial class AddClothViewModel : ObservableObject
         }
     }
 
-    private Color GetColorFromName(string colorName)
+    private static Color GetColorFromName(string colorName)
     {
         if (string.IsNullOrWhiteSpace(colorName)) return Colors.Gray;
 
@@ -129,7 +122,6 @@ public partial class AddClothViewModel : ObservableObject
     [RelayCommand]
     private async Task AddCloth()
     {
-        // Validate
         var isValid = true;
 
         if (string.IsNullOrWhiteSpace(Name))
@@ -158,23 +150,20 @@ public partial class AddClothViewModel : ObservableObject
 
         if (!isValid) return;
 
-        double.TryParse(PricePerMeter, out var priceValue);
-        double.TryParse(TotalMeters, out var metersValue);
+        double.TryParse(PricePerMeter, out double priceValue);
+        double.TryParse(TotalMeters, out double metersValue);
 
-        // Create new cloth
-        var cloth = new Cloth(
-            Guid.NewGuid().ToString(),
-            Name,
-            Color,
-            (decimal)priceValue,
-            (decimal)metersValue,
-            (decimal)metersValue,
-            DateTime.Now
-        );
+        var cloth = new Cloth
+        {
+            Name = Name,
+            Color = Color,
+            PricePerMeter = priceValue,
+            TotalMeters = metersValue,
+            RemainingMeters = metersValue,
+            AddedDate = DateTime.Now
+        };
 
-        await _dataService.AddClothAsync(cloth);
-
-        // Close dialog
+        await dataService.AddClothAsync(cloth);
         await Close();
     }
 

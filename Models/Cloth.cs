@@ -1,11 +1,11 @@
 namespace OMS.Models;
 
-public record Cloth(
-    string Id,
-    string Name,
-    string Color,
-    decimal PricePerMeter,
-    decimal TotalMeters,
-    decimal RemainingMeters,
-    DateTime AddedDate
-);
+public sealed class Cloth {
+    public  int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
+    public double PricePerMeter { get; set; }
+    public double TotalMeters { get; set; }
+    public double RemainingMeters { get; set; }
+    public DateTime AddedDate { get; set; }
+}
