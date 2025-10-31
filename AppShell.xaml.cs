@@ -12,6 +12,6 @@ public partial class AppShell : Shell
             Routing.RegisterRoute("ClothInventory", typeof(ClothInventoryPage));
             Routing.RegisterRoute("DressOrders", typeof(DressOrdersPage));
             Routing.RegisterRoute("MakerWorkspace", typeof(MakerWorkspacePage));
-            Routing.RegisterRoute("AddMaker", typeof(AddMakerPage));
+            Routing.RegisterRoute("AddMaker", typeof(AddMakerDialog));
     }
 }

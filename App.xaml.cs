@@ -14,7 +14,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        if (CurrentUser == null)
+        if (CurrentUser != null)
         {
             return new Window(new AppShell());
         }
@@ -27,7 +27,6 @@ public partial class App : Application
             }
             else
             {
-                // Fallback, but should not happen
                 return new Window(new AppShell());
             }
         }

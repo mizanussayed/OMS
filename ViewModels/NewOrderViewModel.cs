@@ -20,6 +20,7 @@ public partial class ClothPickerItem : ObservableObject
 public partial class NewOrderViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
+    private readonly IAlert _alertService;
 
     [ObservableProperty]
     private string customerName = string.Empty;
@@ -81,9 +82,10 @@ public partial class NewOrderViewModel : ObservableObject
     [ObservableProperty]
     private double estimatedCost;
 
-    public NewOrderViewModel(IDataService dataService)
+    public NewOrderViewModel(IDataService dataService, IAlert alertService)
     {
         _dataService = dataService;
+        _alertService = alertService;
         LoadCloths();
     }
 

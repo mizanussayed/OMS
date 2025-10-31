@@ -9,10 +9,12 @@ namespace OMS.ViewModels;
 public partial class LoginViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
+    private readonly IAlert _alertService;
 
-    public LoginViewModel(IDataService dataService)
+    public LoginViewModel(IDataService dataService, IAlert alertService)
     {
         _dataService = dataService;
+        _alertService = alertService;
     }
 
     private bool _isAdminSelected = true;
@@ -72,15 +74,14 @@ public partial class LoginViewModel : ObservableObject
     {
         SignInButtonText = "Signing In...";
 
-        if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
-        {
-            await Application.Current.MainPage.DisplayAlert("Error", "Please enter username and password", "OK");
-            SignInButtonText = "Sign In";
-            return;
-        }
-
         try
         {
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+            {
+                await _alertService.DisplayAlert("Error", "Please enter username and password", "OK");
+                return;
+            }
+
             if (IsAdminSelected)
             {
                 if (Username == "admin" && Password == "admin")
@@ -91,14 +92,13 @@ public partial class LoginViewModel : ObservableObject
                         Role: UserRole.Admin
                     );
                     App.CurrentUser = adminUser;
-                    await Shell.Current.GoToAsync("//Dashboard");
-                    SignInButtonText = "Sign In";
+                    
+                    App.SwitchToAppShell();
                     return;
                 }
                 else
                 {
-                    await Application.Current.MainPage.DisplayAlert("Error", "Invalid admin credentials", "OK");
-                    SignInButtonText = "Sign In";
+                    await _alertService.DisplayAlert("Error", "Invalid admin credentials", "OK");
                     return;
                 }
             }
@@ -109,8 +109,7 @@ public partial class LoginViewModel : ObservableObject
 
                 if (employee == null)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Error", "Invalid username or password", "OK");
-                    SignInButtonText = "Sign In";
+                    await _alertService.DisplayAlert("Error", "Invalid username or password", "OK");
                     return;
                 }
 
@@ -122,16 +121,20 @@ public partial class LoginViewModel : ObservableObject
 
                 App.CurrentUser = loggedInUser;
 
-                var page = new MakerWorkspacePage
+                var parameters = new Dictionary<string, object>
                 {
-                    BindingContext = new MakerWorkspaceViewModel(_dataService, loggedInUser.Id, loggedInUser.Name)
+                    { "userId", loggedInUser.Id },
+                    { "userName", loggedInUser.Name }
                 };
-                await Shell.Current.Navigation.PushAsync(page);
+
+                App.SwitchToAppShell();
+                await Task.Delay(100);
+                await Shell.Current.GoToAsync("//MakerWorkspacePage", parameters);
             }
         }
-        catch
+        catch(Exception ex)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", "An error occurred during login. Please try again.", "OK");
+            await _alertService.DisplayAlert("Error", "An error occurred during login. Please try again.", "OK");
         }
         finally
         {

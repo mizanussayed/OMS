@@ -5,15 +5,16 @@ using OMS.Services;
 
 namespace OMS.ViewModels;
 
-public partial class AddMakerViewModel(IDataService dataService) : ObservableObject
+public partial class AddMakerViewModel(IDataService dataService, IAlert alertService) : ObservableObject
 {
-    private readonly IDataService _dataService = dataService;
-
     [ObservableProperty]
     private string name = string.Empty;
 
     [ObservableProperty]
     private string username = string.Empty;
+
+    [ObservableProperty]
+    private string mobileNumber = string.Empty;
 
     [ObservableProperty]
     private string password = string.Empty;
@@ -26,13 +27,13 @@ public partial class AddMakerViewModel(IDataService dataService) : ObservableObj
     {
         if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
         {
-            await Application.Current.MainPage.DisplayAlert("Error", "Please fill all fields", "OK");
+            await alertService.DisplayAlert("Error", "Please fill all required fields", "OK");
             return;
         }
 
         if (Password != ConfirmPassword)
         {
-            await Application.Current.MainPage.DisplayAlert("Error", "Passwords do not match", "OK");
+            await alertService.DisplayAlert("Error", "Passwords do not match", "OK");
             return;
         }
 
@@ -41,18 +42,26 @@ public partial class AddMakerViewModel(IDataService dataService) : ObservableObj
             Name = Name,
             Username = Username,
             Password = Password,
-            MobileNumber = "" // Assuming mobile is optional or add a field
+            MobileNumber = MobileNumber,
         };
 
-        await _dataService.AddEmployeeAsync(employee);
+        await dataService.AddEmployeeAsync(employee);
 
-        await Application.Current.MainPage.DisplayAlert("Success", $"Maker {Name} added successfully", "OK");
+        await alertService.DisplayAlert("Success", $"Maker {Name} added successfully", "OK");
 
+        // Clear form
         Name = string.Empty;
         Username = string.Empty;
+        MobileNumber = string.Empty;
         Password = string.Empty;
         ConfirmPassword = string.Empty;
 
-        await Shell.Current.GoToAsync("..");
+        await Close();
+    }
+
+    [RelayCommand]
+    private async Task Close()
+    {
+        await Shell.Current.Navigation.PopModalAsync();
     }
 }

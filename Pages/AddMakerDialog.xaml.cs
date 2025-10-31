@@ -2,9 +2,9 @@ using OMS.ViewModels;
 
 namespace OMS.Pages;
 
-public partial class AddMakerPage : ContentPage
+public partial class AddMakerDialog : ContentPage
 {
-    public AddMakerPage(AddMakerViewModel viewModel)
+    public AddMakerDialog(AddMakerViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;

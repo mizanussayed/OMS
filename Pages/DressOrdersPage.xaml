@@ -3,6 +3,8 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:components="clr-namespace:OMS.Components"
+    xmlns:vm="clr-namespace:OMS.ViewModels"
+    x:DataType="vm:DressOrdersViewModel"
     x:Class="OMS.Pages.DressOrdersPage"
     Title="Orders"
     BackgroundColor="{StaticResource Gray50}"

@@ -10,11 +10,13 @@ namespace OMS.ViewModels;
 public partial class DressOrdersViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
+    private readonly IAlert _alertService;
 
-    public DressOrdersViewModel(IDataService dataService)
+    public DressOrdersViewModel(IDataService dataService, IAlert alertService)
     {
         _dataService = dataService;
-        LoadDataAsync();
+        _alertService = alertService;
+        _ = LoadDataAsync();
     }
 
     [ObservableProperty]
@@ -49,57 +51,32 @@ public partial class DressOrdersViewModel : ObservableObject
     {
         var dialog = new NewOrderDialog
         {
-            BindingContext = new NewOrderViewModel(_dataService)
+            BindingContext = new NewOrderViewModel(_dataService, _alertService)
         };
         await Shell.Current.Navigation.PushModalAsync(dialog);
         
-        // Reload data when dialog closes
         await Task.Delay(500);
         await LoadDataAsync();
     }
-
-    [RelayCommand]
-    private async Task Logout()
-    {
-        App.CurrentUser = null;
-
-        // Switch back to Login page
-        if (App.Current?.Windows.Count > 0)
-        {
-            var loginPage = new LoginPage(new LoginViewModel(_dataService));
-            App.Current.Windows[0].Page = new NavigationPage(loginPage);
-        }
-    }
 }
 
-public partial class DressOrderItemViewModel : ObservableObject
+public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDataService dataService) : ObservableObject
 {
-    private readonly DressOrder _order;
-    private readonly Cloth? _cloth;
-    private readonly IDataService _dataService;
-    private DressOrderStatus _status;
+    private DressOrderStatus _status = order.Status;
 
-    public DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDataService dataService)
-    {
-        _order = order;
-        _cloth = cloth;
-        _dataService = dataService;
-        _status = order.Status;
-    }
-
-    public int Id => _order.Id;
-    public string CustomerName => _order.CustomerName;
-    public string DressType => _order.DressType;
-    public int ClothId => _order.ClothId;
-    public double MetersUsed => _order.MetersUsed;
+    public int Id => order.Id;
+    public string CustomerName => order.CustomerName;
+    public string DressType => order.DressType;
+    public int ClothId => order.ClothId;
+    public double MetersUsed => order.MetersUsed;
     public DressOrderStatus Status => _status;
-    public int? AssignedTo => _order.AssignedTo;
-    public DateTime OrderDate => _order.OrderDate;
+    public int? AssignedTo => order.AssignedTo;
+    public DateTime OrderDate => order.OrderDate;
 
     // Cloth properties
-    public string ClothName => _cloth?.Name ?? "Unknown";
-    public string ClothColor => _cloth?.Color ?? "Unknown";
-    public double TotalCost => _cloth != null ? MetersUsed * _cloth.PricePerMeter : 0;
+    public string ClothName => cloth?.Name ?? "Unknown";
+    public string ClothColor => cloth?.Color ?? "Unknown";
+    public double TotalCost => cloth != null ? MetersUsed * cloth.PricePerMeter : 0;
 
     // Status properties
     public string StatusText => Status switch
@@ -139,14 +116,12 @@ public partial class DressOrderItemViewModel : ObservableObject
     public bool IsCompleted => Status == DressOrderStatus.Completed;
     public bool IsDelivered => Status == DressOrderStatus.Delivered;
 
-    // Assigned To
     public bool HasAssignedTo => AssignedTo > 0;
 
-    // Commands
     [RelayCommand]
     private async Task Complete()
     {
-        await _dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Completed);
+        await dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Completed);
         _status = DressOrderStatus.Completed;
         OnPropertyChanged(nameof(Status));
         OnPropertyChanged(nameof(StatusText));
@@ -161,7 +136,7 @@ public partial class DressOrderItemViewModel : ObservableObject
     [RelayCommand]
     private async Task Deliver()
     {
-        await _dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Delivered);
+        await dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Delivered);
         _status = DressOrderStatus.Delivered;
         OnPropertyChanged(nameof(Status));
         OnPropertyChanged(nameof(StatusText));

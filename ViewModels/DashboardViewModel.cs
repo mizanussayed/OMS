@@ -10,10 +10,12 @@ namespace OMS.ViewModels;
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
+    private readonly IAlert _alertService;
 
-    public DashboardViewModel(IDataService dataService)
+    public DashboardViewModel(IDataService dataService, IAlert alertService)
     {
         _dataService = dataService;
+        _alertService = alertService;
         LoadData();
     }
 
@@ -42,7 +44,6 @@ public partial class DashboardViewModel : ObservableObject
     {
         var clothsList = await _dataService.GetClothsAsync();
         
-        // Convert to ClothViewModel with additional UI properties
         var clothViewModels = clothsList.Select(c => new ClothViewModel(c)).ToList();
         Cloths = new ObservableCollection<ClothViewModel>(clothViewModels);
         
@@ -57,7 +58,6 @@ public partial class DashboardViewModel : ObservableObject
         );
         HasLowStockItems = LowStockCloths.Any();
 
-        // Update user role description
         if (App.CurrentUser != null)
         {
             UserRoleDescription = App.CurrentUser.Role == UserRole.Admin 
@@ -67,42 +67,41 @@ public partial class DashboardViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task Logout()
+    private Task Logout()
     {
         App.CurrentUser = null;
 
-        // Switch back to Login page
         if (App.Current?.Windows.Count > 0)
         {
-            var loginPage = new LoginPage(new LoginViewModel(_dataService));
+            var loginPage = new LoginPage(new LoginViewModel(_dataService, _alertService));
             App.Current.Windows[0].Page = new NavigationPage(loginPage);
         }
+
+        return Task.CompletedTask;
     }
 
     [RelayCommand]
     private async Task AddMaker()
     {
-        await Shell.Current.GoToAsync("AddMaker");
+        var viewModel = new AddMakerViewModel(_dataService, _alertService);
+        var dialog = new AddMakerDialog(viewModel);
+        await Shell.Current.Navigation.PushModalAsync(dialog);
+        
+        // Reload data when dialog closes
+        await Task.Delay(500);
+        LoadData();
     }
 }
 
-public class ClothViewModel : ObservableObject
+public class ClothViewModel(Cloth cloth) : ObservableObject
 {
-    private readonly Cloth _cloth;
-
-    public ClothViewModel(Cloth cloth)
-    {
-        _cloth = cloth;
-    }
-
-    public string Id => _cloth.Id.ToString();
-    public string Name => _cloth.Name;
-    public string Color => _cloth.Color;
-    public double PricePerMeter => _cloth.PricePerMeter;
-    public double TotalMeters => _cloth.TotalMeters;
-    public double RemainingMeters => _cloth.RemainingMeters;
-    public DateTime AddedDate => _cloth.AddedDate;
-
+    public string Id => cloth.Id.ToString();
+    public string Name => cloth.Name;
+    public string Color => cloth.Color;
+    public double PricePerMeter => cloth.PricePerMeter;
+    public double TotalMeters => cloth.TotalMeters;
+    public double RemainingMeters => cloth.RemainingMeters;
+    public DateTime AddedDate => cloth.AddedDate;
     public double UsagePercent => ((TotalMeters - RemainingMeters) / TotalMeters * 100);
-    public double ProgressWidth => UsagePercent * 3; // Multiply for visual width (adjust as needed)
+    public double ProgressWidth => UsagePercent * 3;
 }

@@ -3,10 +3,13 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:components="clr-namespace:OMS.Components"
+    xmlns:vm="clr-namespace:OMS.ViewModels"
+    x:DataType="vm:ClothInventoryViewModel"
     x:Class="OMS.Pages.ClothInventoryPage"
     Title="Inventory"
     BackgroundColor="{StaticResource Gray50}"
     Shell.NavBarIsVisible="False">
+    
     <Grid RowDefinitions="Auto,*">
         <components:GradientHeader Grid.Row="0"
              Title="Cloth Inventory"

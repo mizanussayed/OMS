@@ -14,7 +14,6 @@
 		<ApplicationVersion>1</ApplicationVersion>
 		<SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#9333ea" />
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#faf5ff" BaseSize="456,456" />
@@ -25,12 +24,6 @@
 	<ItemGroup>
 		<PackageReference Include="Google.Cloud.Firestore" Version="3.11.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-	</ItemGroup>
-	<ItemGroup>
-	  <MauiXaml Update="Pages\AddMakerPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
 	</ItemGroup>
 </Project>

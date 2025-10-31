@@ -4,38 +4,38 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:components="clr-namespace:OMS.Components"
     xmlns:vm="clr-namespace:OMS.ViewModels"
-    x:DataType="vm:AddClothViewModel"
-    x:Class="OMS.Pages.AddClothDialog"
+    x:DataType="vm:AddMakerViewModel"
+    x:Class="OMS.Pages.AddMakerDialog"
     BackgroundColor="#80000000">
-    
+
     <!-- Semi-transparent overlay -->
     <Grid>
         <Grid.GestureRecognizers>
             <TapGestureRecognizer Command="{Binding CloseCommand}"/>
         </Grid.GestureRecognizers>
-        
+
         <!-- Bottom Sheet Dialog -->
         <Border BackgroundColor="White"
                 StrokeThickness="0"
                 VerticalOptions="End"
                 HorizontalOptions="Fill"
-                MaximumHeightRequest="600">
+                MaximumHeightRequest="700">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer />
             </Border.GestureRecognizers>
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="16,16,0,0" />
             </Border.StrokeShape>
-            
+
             <Grid RowDefinitions="Auto,*,Auto" Padding="24">
                 <!-- Header -->
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
-                        <Label Text="Add New Cloth" 
+                        <Label Text="Add New Maker" 
                                FontSize="20"
                                FontAttributes="Bold" 
                                TextColor="{StaticResource Gray900}"/>
-                        <Label Text="Add cloth to your inventory with pricing and quantity details"
+                        <Label Text="Register a new maker to handle dress orders"
                                FontSize="14"
                                TextColor="{StaticResource Gray600}"
                                LineBreakMode="WordWrap"/>
@@ -55,43 +55,48 @@
                 <!-- Form -->
                 <ScrollView Grid.Row="1" Margin="0,20,0,0">
                     <VerticalStackLayout Spacing="16">
-                        <!-- Cloth Name -->
-                        <components:InputField Label="Cloth Name"
-                                              Text="{Binding Name}"
-                                              Placeholder="e.g., Cotton Premium"
-                                              ErrorMessage="{Binding NameError}"/>
+                        <components:InputField 
+                            Label="Name"
+                            Text="{Binding Name}"
+                            Placeholder="Enter maker's full name"/>
+                        <components:InputField Label="Username"
+                            Text="{Binding Username}"
+                            Placeholder="Enter username for login"/>
 
-                        <!-- Color -->
-                        <components:InputField Label="Color"
-                                              Text="{Binding Color}"
-                                              Placeholder="e.g., Blue, Red"
-                                              ErrorMessage="{Binding ColorError}"/>
+                        <components:InputField Label="Mobile Number"
+                            Text="{Binding MobileNumber}"
+                            Placeholder="Enter mobile number"
+                            Keyboard="Telephone"/>
 
-                        <!-- Row: Price and Total Meters -->
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                            <components:InputField Grid.Column="0"
-                                                  Label="Price per Meter (₹)"
-                                                  Text="{Binding PricePerMeter}"
-                                                  Placeholder="450"
-                                                  Keyboard="Numeric"
-                                                  ErrorMessage="{Binding PriceError}"/>
+                        <components:InputField Label="Password"
+                            Text="{Binding Password}"
+                            Placeholder="Enter password"
+                            IsPassword="True"/>
 
-                            <components:InputField Grid.Column="1"
-                                                  Label="Total Meters"
-                                                  Text="{Binding TotalMeters}"
-                                                  Placeholder="50"
-                                                  Keyboard="Numeric"
-                                                  ErrorMessage="{Binding MetersError}"/>
-                        </Grid>
+                        <components:InputField Label="Confirm Password"
+                            Text="{Binding ConfirmPassword}"
+                            Placeholder="Confirm password"
+                            IsPassword="True"/>
+
+                        <!-- Info Box -->
+                                <HorizontalStackLayout Spacing="8">
+                                <Label Text="ℹ️"
+                                       FontSize="14"
+                                       VerticalOptions="Start"/>
+                                <Label Text="The maker will use username and password to log in"
+                                       FontSize="12"
+                                       TextColor="{StaticResource Purple900}"
+                                       LineBreakMode="HeadTruncation"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
                     </VerticalStackLayout>
                 </ScrollView>
 
-                <!-- Action Button -->
                 <components:ActionButton Grid.Row="2"
-                                        Text="Add to Inventory"
-                                        Variant="Primary"
-                                        Command="{Binding AddClothCommand}"
-                                        Margin="0,20,0,0"/>
+                         Text="Add Maker"
+                         Command="{Binding AddMakerCommand}"
+                         Variant="Primary"
+                         Margin="0,20,0,0"/>
             </Grid>
         </Border>
     </Grid>

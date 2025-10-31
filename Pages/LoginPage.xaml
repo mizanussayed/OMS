@@ -3,6 +3,8 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:components="clr-namespace:OMS.Components"
+    xmlns:vm="clr-namespace:OMS.ViewModels"
+    x:DataType="vm:LoginViewModel"
     x:Class="OMS.Pages.LoginPage"
     Shell.NavBarIsVisible="False"
     NavigationPage.HasNavigationBar="False"
@@ -106,27 +108,17 @@
 
                         <!-- Username and Password -->
                         <VerticalStackLayout Spacing="16">
-                            <VerticalStackLayout Spacing="8">
-                                <Label Text="Username" 
-                                       FontSize="13" 
-                                       TextColor="{StaticResource Gray600}"/>
-                                <Entry Text="{Binding Username}" 
-                                       Placeholder="Enter your username"
-                                       PlaceholderColor="{StaticResource Gray400}"
-                                       BackgroundColor="Transparent"
-                                       FontSize="15"/>
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Spacing="8">
-                                <Label Text="Password" 
-                                       FontSize="13" 
-                                       TextColor="{StaticResource Gray600}"/>
-                                <Entry Text="{Binding Password}" 
-                                       Placeholder="Enter your password"
-                                       PlaceholderColor="{StaticResource Gray400}"
-                                       IsPassword="True"
-                                       BackgroundColor="Transparent"
-                                       FontSize="15"/>
-                            </VerticalStackLayout>
+                            <components:InputField
+                                 Label="Username"
+                                 Text="{Binding Username}"
+                                 Placeholder="Enter username for login"/>
+
+                            <components:InputField 
+                                 Label="Password"
+                                 Text="{Binding Password}"
+                                 Placeholder="Enter password"
+                                 IsPassword="True" />
+
                         </VerticalStackLayout>
 
                         <!-- Login Button -->

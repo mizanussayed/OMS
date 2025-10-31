@@ -14,7 +14,7 @@ public partial class ClothInventoryViewModel : ObservableObject
     public ClothInventoryViewModel(IDataService dataService)
     {
         _dataService = dataService;
-        LoadDataAsync();
+         _ =LoadDataAsync();
     }
 
     [ObservableProperty]

@@ -20,13 +20,13 @@ namespace OMS
 
             // Services
             builder.Services.AddSingleton<IDataService, FirebaseDataService>();
+            builder.Services.AddSingleton<IAlert, AlertService>();
 
             // ViewModels
-            builder.Services.AddTransient<LoginViewModel>(sp => new LoginViewModel(sp.GetRequiredService<IDataService>()));
+            builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<DashboardViewModel>();
             builder.Services.AddTransient<ClothInventoryViewModel>();
             builder.Services.AddTransient<DressOrdersViewModel>();
-            builder.Services.AddTransient<HomeViewModel>();
             builder.Services.AddTransient<AddClothViewModel>();
             builder.Services.AddTransient<NewOrderViewModel>();
             builder.Services.AddTransient<AddMakerViewModel>();
@@ -36,11 +36,10 @@ namespace OMS
             builder.Services.AddTransient<DashboardPage>();
             builder.Services.AddTransient<ClothInventoryPage>();
             builder.Services.AddTransient<DressOrdersPage>();
-            builder.Services.AddTransient<HomePage>();
             builder.Services.AddTransient<AddClothDialog>();
             builder.Services.AddTransient<NewOrderDialog>();
             builder.Services.AddTransient<MakerWorkspacePage>();
-            builder.Services.AddTransient<AddMakerPage>();
+            builder.Services.AddTransient<AddMakerDialog>();
 
 #if DEBUG
     		builder.Logging.AddDebug();
