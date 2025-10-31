@@ -12,6 +12,12 @@ public partial class ClothPickerItem(Cloth cloth) : ObservableObject
     public string DisplayText => $"{Cloth.Name} - {Cloth.Color}";
 }
 
+public partial class MakerPickerItem(Employee employee) : ObservableObject
+{
+    public Employee Employee { get; } = employee;
+    public string DisplayText => Employee.Name;
+}
+
 public partial class NewOrderViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
@@ -32,6 +38,9 @@ public partial class NewOrderViewModel : ObservableObject
 
     [ObservableProperty]
     private string customerNameError = string.Empty;
+
+    [ObservableProperty]
+    private string mobileNumberError = string.Empty;
 
     [ObservableProperty]
     private string dressTypeError = string.Empty;
@@ -70,10 +79,10 @@ public partial class NewOrderViewModel : ObservableObject
     private string selectedClothStock = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<string> makers = new() { "Maker 1", "Maker 2", "Maker 3" };
+    private ObservableCollection<MakerPickerItem> makers = [];
 
     [ObservableProperty]
-    private int? selectedMaker;
+    private MakerPickerItem? selectedMaker;
 
     [ObservableProperty]
     private bool hasCostPreview;
@@ -85,10 +94,10 @@ public partial class NewOrderViewModel : ObservableObject
     {
         _dataService = dataService;
         _alertService = alertService;
-        LoadCloths();
+        LoadData();
     }
 
-    private async void LoadCloths()
+    private async void LoadData()
     {
         var clothsList = await _dataService.GetClothsAsync();
         Cloths.Clear();
@@ -96,11 +105,22 @@ public partial class NewOrderViewModel : ObservableObject
         {
             Cloths.Add(new ClothPickerItem(cloth));
         }
+
+        var employeesList = await _dataService.GetEmployeesAsync();
+        Makers.Clear();
+        foreach (var employee in employeesList)
+        {
+            Makers.Add(new MakerPickerItem(employee));
+        }
     }
 
     partial void OnCustomerNameChanged(string value)
     {
         CustomerNameError = string.Empty;
+    }
+    partial void OnMobileNumberChanged(string value)
+    {
+        MobileNumberError = string.Empty;
     }
 
     partial void OnDressTypeChanged(string value)
@@ -184,6 +204,12 @@ public partial class NewOrderViewModel : ObservableObject
             isValid = false;
         }
 
+        if (string.IsNullOrWhiteSpace(MobileNumber))
+        {
+            MobileNumberError = "Mobile number is required";
+            isValid = false;
+        }
+
         if (string.IsNullOrWhiteSpace(DressType))
         {
             DressTypeError = "Dress type is required";
@@ -222,7 +248,7 @@ public partial class NewOrderViewModel : ObservableObject
                 ClothId = SelectedCloth!.Cloth.Id,
                 MetersUsed = metersValue,
                 Status = DressOrderStatus.Pending,
-                AssignedTo = SelectedMaker ?? 0,
+                AssignedTo = SelectedMaker?.Employee.Id ?? 0,
                 OrderDate = DateTime.Now
             };
 
@@ -233,7 +259,7 @@ public partial class NewOrderViewModel : ObservableObject
             // Close dialog
             await Close();
         }
-        catch (Exception ex)
+        catch
         {
             await _alertService.DisplayAlert("Error", "Failed to create order. Please try again.", "OK");
         }

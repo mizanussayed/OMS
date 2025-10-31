@@ -130,7 +130,7 @@
                             <Label Text="Inventory Value"
                                    FontSize="12"
                                    TextColor="{StaticResource Gray600}"/>
-                            <Label Text="{Binding InventoryValue, StringFormat='₹{0:N0}'}"
+                            <Label Text="{Binding InventoryValue, StringFormat='৳{0:N0}'}"
                                    FontSize="24"
                                    FontAttributes="Bold"
                                    TextColor="{StaticResource Gray900}"/>
@@ -177,7 +177,7 @@
                                                FontAttributes="Bold"
                                                TextColor="{StaticResource Gray900}"/>
                                         <Label Grid.Column="1"
-                                               Text="{Binding PricePerMeter, StringFormat='₹{0}/m'}" 
+                                               Text="{Binding PricePerMeter, StringFormat='৳{0}/m'}" 
                                                FontSize="15"
                                                FontAttributes="Bold"
                                                TextColor="{StaticResource Gray900}"
@@ -217,7 +217,7 @@
                                         </Border.StrokeShape>
                                         <Border WidthRequest="{Binding ProgressWidth}"
                                                 HeightRequest="6"
-                                                BackgroundColor="#9333ea"
+                                                BackgroundColor="{Binding ProgressColor}"
                                                 HorizontalOptions="Start"
                                                 StrokeThickness="0">
                                             <Border.StrokeShape>

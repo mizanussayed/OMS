@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using OMS.Pages;
 using OMS.Services;
 using System.Collections.ObjectModel;
 
@@ -7,7 +8,8 @@ namespace OMS.ViewModels;
 
 public partial class MakerWorkspaceViewModel : ObservableObject
 {
-    private readonly IDataService _dataService;
+    private readonly IDataService dataService;
+    private readonly IAlert alertService;
     private readonly int _makerId;
 
     [ObservableProperty]
@@ -25,9 +27,10 @@ public partial class MakerWorkspaceViewModel : ObservableObject
     [ObservableProperty]
     private bool hasNoOrders;
 
-    public MakerWorkspaceViewModel(IDataService dataService, int makerId, string makerName)
+    public MakerWorkspaceViewModel(IDataService dataService, IAlert alertService, int makerId, string makerName)
     {
-        _dataService = dataService;
+        this.dataService = dataService;
+        this.alertService = alertService;
         _makerId = makerId;
         MakerName = makerName;
     }
@@ -35,15 +38,15 @@ public partial class MakerWorkspaceViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadDataAsync()
     {
-        var allOrders = await _dataService.GetOrdersAsync();
-        var clothsList = await _dataService.GetClothsAsync();
+        var allOrders = await dataService.GetOrdersAsync();
+        var clothsList = await dataService.GetClothsAsync();
 
         var myOrders = allOrders.Where(o => o.AssignedTo == _makerId).ToList();
 
         var orderViewModels = myOrders.Select(o =>
         {
             var cloth = clothsList.FirstOrDefault(c => c.Id == o.ClothId);
-            return new DressOrderItemViewModel(o, cloth, _dataService);
+            return new DressOrderItemViewModel(o, cloth, dataService);
         }).ToList();
 
         Orders = new ObservableCollection<DressOrderItemViewModel>(orderViewModels);
@@ -53,10 +56,16 @@ public partial class MakerWorkspaceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private static async Task Logout()
+    private Task Logout()
     {
         App.CurrentUser = null;
 
-        await Shell.Current.GoToAsync("//login");
+        if (App.Current?.Windows.Count > 0)
+        {
+            var loginPage = new LoginPage(new LoginViewModel(dataService, alertService));
+            App.Current.Windows[0].Page = new NavigationPage(loginPage);
+        }
+
+        return Task.CompletedTask;
     }
 }

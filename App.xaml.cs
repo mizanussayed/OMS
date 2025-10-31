@@ -1,5 +1,7 @@
 ﻿using OMS.Models;
 using OMS.Pages;
+using OMS.Services;
+using OMS.ViewModels;
 
 namespace OMS;
 
@@ -14,7 +16,7 @@ public partial class App : Application
 
     protected override Window CreateWindow(IActivationState? activationState)
     {
-        if (CurrentUser != null)
+        if (CurrentUser is not null)
         {
             return new Window(new AppShell());
         }
@@ -36,7 +38,25 @@ public partial class App : Application
     {
         if (Current?.Windows.Count > 0)
         {
-            Current.Windows[0].Page = new AppShell();
+            if (CurrentUser?.Role == UserRole.Admin)
+            {
+                Current.Windows[0].Page = new AppShell();
+            }
+            else if (CurrentUser?.Role == UserRole.Maker)
+            {
+                var services = Current.Handler?.MauiContext?.Services;
+                if (services is not null)
+                {
+                    var dataService = services.GetService<IDataService>();
+                    var alertService = services.GetService<IAlert>();
+                    if (dataService is not null && alertService is not null)
+                    {
+                        var viewModel = new MakerWorkspaceViewModel(dataService, alertService, CurrentUser.Id, CurrentUser.Name);
+                        var makerPage = new MakerWorkspacePage(viewModel);
+                        Current.Windows[0].Page = new NavigationPage(makerPage);
+                    }
+                }
+            }
         }
     }
 }

@@ -6,6 +6,7 @@
     xmlns:vm="clr-namespace:OMS.ViewModels"
     x:DataType="vm:MakerWorkspaceViewModel"
     x:Class="OMS.Pages.MakerWorkspacePage"
+    NavigationPage.HasNavigationBar="False"
     Title="My Orders"
     BackgroundColor="{StaticResource Gray50}">
     

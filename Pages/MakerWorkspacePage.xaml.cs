@@ -1,4 +1,3 @@
-using OMS.Services;
 using OMS.ViewModels;
 
 namespace OMS.Pages;
@@ -7,27 +6,11 @@ public partial class MakerWorkspacePage : ContentPage
 {
     private MakerWorkspaceViewModel? _viewModel;
 
-    public MakerWorkspacePage(IDataService dataService)
+    public MakerWorkspacePage(MakerWorkspaceViewModel viewModel)
     {
         InitializeComponent();
-        _dataService = dataService;
-    }
-
-    private readonly IDataService _dataService;
-
-    protected override void OnNavigatedTo(NavigatedToEventArgs args)
-    {
-        base.OnNavigatedTo(args);
-
-        if (BindingContext == null && App.CurrentUser != null)
-        {
-            _viewModel = new MakerWorkspaceViewModel(
-                _dataService,
-                App.CurrentUser.Id,
-                App.CurrentUser.Name
-            );
-            BindingContext = _viewModel;
-        }
+        _viewModel = viewModel;
+        BindingContext = _viewModel;
     }
 
     protected override async void OnAppearing()

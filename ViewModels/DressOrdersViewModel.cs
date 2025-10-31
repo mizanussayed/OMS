@@ -10,7 +10,7 @@ namespace OMS.ViewModels;
 public partial class DressOrdersViewModel(IDataService dataService, IAlert alertService) : ObservableObject
 {
     [ObservableProperty]
-    private ObservableCollection<DressOrderItemViewModel> orders = new();
+    private ObservableCollection<DressOrderItemViewModel> orders = [];
 
     [ObservableProperty]
     private bool hasNoOrders;
@@ -55,6 +55,7 @@ public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDa
 
     public int Id => order.Id;
     public string CustomerName => order.CustomerName;
+    public string MobileNumber => order.MobileNumber;
     public string DressType => order.DressType;
     public int ClothId => order.ClothId;
     public double MetersUsed => order.MetersUsed;
@@ -63,6 +64,7 @@ public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDa
     public DateTime OrderDate => order.OrderDate;
 
     // Cloth properties
+    public string AssignedToName => "Manager";
     public string ClothName => cloth?.Name ?? "Unknown";
     public string ClothColor => cloth?.Color ?? "Unknown";
     public double TotalCost => cloth != null ? MetersUsed * cloth.PricePerMeter : 0;

@@ -85,7 +85,7 @@
                                        VerticalOptions="Start"/>
                                 <Label Text="The maker will use username and password to log in"
                                        FontSize="12"
-                                       TextColor="{StaticResource Purple900}"
+                                       TextColor="{StaticResource Purple600}"
                                        LineBreakMode="HeadTruncation"
                                        VerticalOptions="Center"/>
                             </HorizontalStackLayout>

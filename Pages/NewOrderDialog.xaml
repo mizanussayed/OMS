@@ -62,7 +62,7 @@
                                               Text="{Binding MobileNumber}"
                                               Keyboard="Telephone"
                                               Placeholder="Enter mobile number"
-                                              ErrorMessage="{Binding CustomerNameError}"/>
+                                              ErrorMessage="{Binding MobileNumberError}"/>
                        
                         <components:InputField Label="Dress Type"
                                               Text="{Binding DressType}"
@@ -95,7 +95,7 @@
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="8" />
                             </Border.StrokeShape>
-                            <Grid ColumnDefinitions="*,Auto" RowSpacing="4">
+                            <Grid ColumnDefinitions="*,Auto" RowSpacing="4" RowDefinitions="*,*">
                                 <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="8">
                                     <BoxView WidthRequest="12" 
                                              HeightRequest="12" 
@@ -107,11 +107,11 @@
                                            TextColor="{StaticResource Gray900}"/>
                                 </HorizontalStackLayout>
                                 <Label Grid.Row="0" Grid.Column="1"
-                                       Text="{Binding SelectedClothPrice, StringFormat='₹{0}/m'}" 
+                                       Text="{Binding SelectedClothPrice, StringFormat='৳{0}/m'}" 
                                        FontSize="14"
                                        FontAttributes="Bold"
                                        TextColor="{StaticResource Gray900}"/>
-                                <Label Grid.Row="1" Grid.Column="0"
+                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                                        Text="{Binding SelectedClothStock, StringFormat='Available: {0}m'}" 
                                        FontSize="12"
                                        TextColor="{StaticResource Gray600}"/>
@@ -133,15 +133,16 @@
                                    FontAttributes="Bold" 
                                    TextColor="{StaticResource Gray700}"/>
                             <Picker ItemsSource="{Binding Makers}" 
+                                    ItemDisplayBinding="{Binding DisplayText}"
                                     SelectedItem="{Binding SelectedMaker}"
                                     BackgroundColor="{StaticResource White}"
                                     TextColor="{StaticResource Gray900}"/>
                         </VerticalStackLayout>
 
                         <!-- Cost Preview -->
-                        <Border BackgroundColor="{StaticResource Purple50}"
+                        <Border BackgroundColor="{StaticResource Purple100}"
                                 StrokeThickness="1"
-                                Stroke="{StaticResource Purple200}"
+                                Stroke="{StaticResource Purple500}"
                                 Padding="16"
                                 IsVisible="{Binding HasCostPreview}">
                             <Border.StrokeShape>
@@ -152,12 +153,12 @@
                                        Text="Estimated Cost" 
                                        FontSize="14"
                                        FontAttributes="Bold"
-                                       TextColor="{StaticResource Purple900}"/>
+                                       TextColor="{StaticResource Purple600}"/>
                                 <Label Grid.Column="1"
-                                       Text="{Binding EstimatedCost, StringFormat='₹{0:N0}'}" 
+                                       Text="{Binding EstimatedCost, StringFormat='৳{0:N0}'}" 
                                        FontSize="18"
                                        FontAttributes="Bold"
-                                       TextColor="{StaticResource Purple900}"/>
+                                       TextColor="{StaticResource Purple600}"/>
                             </Grid>
                         </Border>
                     </VerticalStackLayout>

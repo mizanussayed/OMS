@@ -48,7 +48,7 @@
                                                FontAttributes="Bold"
                                                TextColor="{StaticResource Gray900}"/>
                                         <Label Grid.Column="1"
-                                               Text="{Binding PricePerMeter, StringFormat='₹{0}/m'}" 
+                                               Text="{Binding PricePerMeter, StringFormat='৳{0}/m'}" 
                                                FontSize="16"
                                                FontAttributes="Bold"
                                                TextColor="{StaticResource Gray900}"
@@ -68,7 +68,7 @@
                                                    VerticalOptions="Center"/>
                                         </HorizontalStackLayout>
                                         <Label Grid.Column="1"
-                                               Text="{Binding TotalValue, StringFormat='Total: ₹{0:N0}'}" 
+                                               Text="{Binding TotalValue, StringFormat='Total:৳{0:N0}'}" 
                                                FontSize="12"
                                                TextColor="{StaticResource Gray500}"
                                                HorizontalOptions="End"

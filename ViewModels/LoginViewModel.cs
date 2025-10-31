@@ -114,55 +114,11 @@ public partial class LoginViewModel(IDataService dataService, IAlert alertServic
 
                 App.CurrentUser = loggedInUser;
 
-                // Small delay to ensure user is set
-                await Task.Delay(100);
                 App.SwitchToAppShell();
-
-                // Wait for shell to initialize before navigation
-                await Task.Delay(600);
-
-                // Navigate on main thread
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    try
-                    {
-                        if (Shell.Current != null)
-                        {
-                            await Shell.Current.GoToAsync("//MakerWorkspacePage");
-                        }
-                    }
-                    catch (Exception navEx)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Navigation error: {navEx.Message}");
-                        // Navigation failed but app should stay on dashboard
-                    }
-                });
             }
         }
-        catch (Exception ex)
+        catch 
         {
-            System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-
-            var errorMessage = "An error occurred during login. Please try again.";
-
-            if (ex.InnerException != null)
-            {
-                System.Diagnostics.Debug.WriteLine($"Inner exception: {ex.InnerException.Message}");
-            }
-
-            await MainThread.InvokeOnMainThreadAsync(async () =>
-            {
-                try
-                {
-                    await alertService.DisplayAlert("Error", errorMessage, "OK");
-                }
-                catch
-                {
-                    // If alert fails, just log it
-                    System.Diagnostics.Debug.WriteLine("Failed to display error alert");
-                }
-            });
         }
         finally
         {

@@ -44,7 +44,7 @@ public class FirebaseDataService : IDataService
                 cloths.Add(FromClothDoc(doc.ToDictionary()));
             return cloths;
         }
-        catch (Exception ex)
+        catch
         {
             return [];
         }
@@ -62,7 +62,7 @@ public class FirebaseDataService : IDataService
                 orders.Add(FromOrderDoc(doc.ToDictionary()));
             return orders;
         }
-        catch(Exception  ex)
+        catch
         {
             return [];
         }
@@ -94,7 +94,7 @@ public class FirebaseDataService : IDataService
             var docRef = db.Collection(ClothCollection).Document(cloth.Id.ToString());
             await docRef.SetAsync(ToClothDoc(cloth));
         }
-        catch (Exception ex)
+        catch
         {
             return;
         }
@@ -103,32 +103,32 @@ public class FirebaseDataService : IDataService
     public async Task AddOrderAsync(DressOrder order)
     {
         try
- {
+        {
             var db = await GetDbAsync();
             order.Id = await GetNextOrderIdAsync(db);
-     var docRef = db.Collection(OrdersCollection).Document(order.Id.ToString());
-    await docRef.SetAsync(ToOrderDoc(order));
-      
-        await UpdateClothRemainingMetersAsync(order.ClothId, order.MetersUsed);
-      }
-        catch (Exception ex)
+            var docRef = db.Collection(OrdersCollection).Document(order.Id.ToString());
+            await docRef.SetAsync(ToOrderDoc(order));
+
+            await UpdateClothRemainingMetersAsync(order.ClothId, order.MetersUsed);
+        }
+        catch 
         {
-    return;
+            return;
         }
     }
 
     public async Task AddEmployeeAsync(Employee employee)
     {
         try
-  {
-            var db = await GetDbAsync();
-       employee.Id = await GetNextEmployeeIdAsync(db);
-      var docRef = db.Collection(EmployeesCollection).Document(employee.Id.ToString());
-            await docRef.SetAsync(ToEmployeeDoc(employee));
-     }
-        catch (Exception en)
         {
-         return;
+            var db = await GetDbAsync();
+            employee.Id = await GetNextEmployeeIdAsync(db);
+            var docRef = db.Collection(EmployeesCollection).Document(employee.Id.ToString());
+            await docRef.SetAsync(ToEmployeeDoc(employee));
+        }
+        catch 
+        {
+            return;
         }
     }
 
@@ -136,44 +136,44 @@ public class FirebaseDataService : IDataService
     {
         try
         {
-    var db = await GetDbAsync();
+            var db = await GetDbAsync();
             var docRef = db.Collection(OrdersCollection).Document(orderId.ToString());
-     await docRef.UpdateAsync(new Dictionary<string, object>
-     {
- [nameof(DressOrder.Status)] = status
-      });
+            await docRef.UpdateAsync(new Dictionary<string, object>
+            {
+                [nameof(DressOrder.Status)] = status
+            });
         }
         catch
-     {
+        {
             return;
-     }
+        }
     }
 
     public async Task UpdateClothRemainingMetersAsync(int clothId, double metersUsed)
     {
-   try
+        try
         {
             var db = await GetDbAsync();
-var docRef = db.Collection(ClothCollection).Document(clothId.ToString());
-       await db.RunTransactionAsync(async transaction =>
-            {
-      var snapshot = await transaction.GetSnapshotAsync(docRef);
-    if (snapshot.Exists)
-    {
-         var currentRemaining = snapshot.GetValue<double>(nameof(Cloth.RemainingMeters));
-        var newRemaining = Math.Max(0, currentRemaining - metersUsed);
+            var docRef = db.Collection(ClothCollection).Document(clothId.ToString());
+            await db.RunTransactionAsync(async transaction =>
+                 {
+                     var snapshot = await transaction.GetSnapshotAsync(docRef);
+                     if (snapshot.Exists)
+                     {
+                         var currentRemaining = snapshot.GetValue<double>(nameof(Cloth.RemainingMeters));
+                         var newRemaining = Math.Max(0, currentRemaining - metersUsed);
 
-             transaction.Update(docRef, new Dictionary<string, object>
-           {
-                  [nameof(Cloth.RemainingMeters)] = newRemaining
-          });
-     }
-     });
+                         transaction.Update(docRef, new Dictionary<string, object>
+                         {
+                             [nameof(Cloth.RemainingMeters)] = newRemaining
+                         });
+                     }
+                 });
         }
-    catch (Exception ex)
+        catch
         {
-  return;
-      }
+            return;
+        }
     }
 
     private static async Task<int> GetNextOrderIdAsync(FirestoreDb db, CancellationToken ct = default)
@@ -208,7 +208,7 @@ var docRef = db.Collection(ClothCollection).Document(clothId.ToString());
             }, cancellationToken: ct);
             return newId;
         }
-        catch (Exception ex)
+        catch 
         {
             return 1;
         }

@@ -70,7 +70,7 @@
                         <!-- Row: Price and Total Meters -->
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <components:InputField Grid.Column="0"
-                                                  Label="Price per Meter (₹)"
+                                                  Label="Price per Meter (৳)"
                                                   Text="{Binding PricePerMeter}"
                                                   Placeholder="450"
                                                   Keyboard="Numeric"
