@@ -121,7 +121,7 @@ public class ClothViewModel : ObservableObject
     }
 
     public string Id => _cloth.Id.ToString();
-    public string Name => _cloth.Name ?? string.Empty;
+    public string Name => _cloth!.Name + " (" + _cloth!.UniqueCode + ")";
     public string Color => _cloth.Color ?? string.Empty;
     public double PricePerMeter => _cloth.PricePerMeter;
     public double TotalMeters => _cloth.TotalMeters;

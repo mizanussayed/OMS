@@ -236,6 +236,7 @@ private static IDictionary<string , object> ToClothDoc(Cloth c)
         {
             [nameof(Cloth.Id)] = c.Id,
             [nameof(Cloth.Name)] = c.Name,
+            [nameof(Cloth.UniqueCode)] = "CLT-"+ c.Id.ToString(),
             [nameof(Cloth.Color)] = c.Color,
             [nameof(Cloth.PricePerMeter)] = c.PricePerMeter,
             [nameof(Cloth.TotalMeters)] = c.TotalMeters,
@@ -250,6 +251,7 @@ private static IDictionary<string , object> ToClothDoc(Cloth c)
         {
             Id = d.TryGetValue(nameof(Cloth.Id), out var id) ? Convert.ToInt32(id) : 0,
             Name = d.TryGetValue(nameof(Cloth.Name), out var name) ? name?.ToString() ?? string.Empty : string.Empty,
+            UniqueCode = d.TryGetValue(nameof(Cloth.UniqueCode), out var uniqueCode) ? uniqueCode?.ToString() ?? string.Empty : string.Empty,
             Color = d.TryGetValue(nameof(Cloth.Color), out var color) ? color?.ToString() ?? string.Empty : string.Empty,
             PricePerMeter = d.TryGetValue(nameof(Cloth.PricePerMeter), out var ppm) ? Convert.ToDouble(ppm) : 0,
             TotalMeters = d.TryGetValue(nameof(Cloth.TotalMeters), out var tm) ? Convert.ToDouble(tm) : 0,
@@ -265,6 +267,7 @@ private static IDictionary<string , object> ToClothDoc(Cloth c)
         return new Dictionary<string, object>
         {
             [nameof(DressOrder.Id)] = o.Id,
+            [nameof(DressOrder.UniqueCode)] = "ORD-" + o.Id.ToString(),
             [nameof(DressOrder.CustomerName)] = o.CustomerName,
             [nameof(DressOrder.MobileNumber)] = o.MobileNumber,
             [nameof(DressOrder.ClothId)] = o.ClothId,
@@ -280,6 +283,7 @@ private static IDictionary<string , object> ToClothDoc(Cloth c)
         var model = new DressOrder
         {
             Id = d.TryGetValue(nameof(DressOrder.Id), out var id) ? Convert.ToInt32(id) : 0,
+            UniqueCode = d.TryGetValue(nameof(DressOrder.UniqueCode), out var uniqueCode) ? uniqueCode?.ToString() ?? string.Empty : string.Empty,
             CustomerName = d.TryGetValue(nameof(DressOrder.CustomerName), out var cn) ? cn?.ToString() ?? string.Empty : string.Empty,
             MobileNumber = d.TryGetValue(nameof(DressOrder.MobileNumber), out var mn) ? mn?.ToString() ?? string.Empty : string.Empty,
             ClothId = d.TryGetValue(nameof(DressOrder.ClothId), out var cid) ? Convert.ToInt32(cid) : 0,

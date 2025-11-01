@@ -16,7 +16,7 @@ public partial class MakerWorkspaceViewModel : ObservableObject
     private string makerName = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<DressOrderItemViewModel> orders = new();
+    private ObservableCollection<DressOrderItemViewModel> orders = [];
 
     [ObservableProperty]
     private int totalOrders;

@@ -54,7 +54,7 @@ public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDa
     private DressOrderStatus _status = order.Status;
 
     public int Id => order.Id;
-    public string CustomerName => order.CustomerName;
+    public string CustomerName => order.CustomerName + " (" + order.UniqueCode + ")";
     public string MobileNumber => order.MobileNumber;
     public string DressType => order.DressType;
     public int ClothId => order.ClothId;
@@ -65,7 +65,7 @@ public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDa
 
     // Cloth properties
     public string AssignedToName => "Manager";
-    public string ClothName => cloth?.Name ?? "Unknown";
+    public string ClothName => cloth!.Name + " (" + cloth!.UniqueCode + ")";
     public string ClothColor => cloth?.Color ?? "Unknown";
     public double TotalCost => cloth != null ? MetersUsed * cloth.PricePerMeter : 0;
 

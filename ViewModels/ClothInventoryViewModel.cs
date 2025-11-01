@@ -46,7 +46,7 @@ public partial class ClothInventoryViewModel(IDataService dataService) : Observa
 public class ClothInventoryItemViewModel(Cloth cloth) : ObservableObject
 {
     public int Id => cloth.Id;
-    public string Name => cloth.Name;
+    public string Name => cloth.Name + " (" + cloth.UniqueCode + ")";
     public string Color => cloth.Color;
     public double PricePerMeter => cloth.PricePerMeter;
     public double TotalMeters => cloth.TotalMeters;
