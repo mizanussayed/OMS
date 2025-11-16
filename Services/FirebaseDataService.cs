@@ -1,3 +1,4 @@
+using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using OMS.Models;
 
@@ -19,12 +20,16 @@ public class FirebaseDataService : IDataService
             using var reader = new StreamReader(stream);
             var json = await reader.ReadToEndAsync();
 
-            return new FirestoreDbBuilder
-            {
-                JsonCredentials = json,
-                ProjectId = "mypm-tailor-ffd0f",
+            var serviceCredential = CredentialFactory.FromJson<ServiceAccountCredential>(json);
+            var credential = serviceCredential.ToGoogleCredential();
 
+            var db = new FirestoreDbBuilder
+            {
+                GoogleCredential = credential,
+                ProjectId = "mypm-tailor-ffd0f",
             }.Build();
+
+            return db;
         }
         catch
         {
