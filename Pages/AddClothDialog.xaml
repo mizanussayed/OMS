@@ -31,11 +31,11 @@
                 <!-- Header -->
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,4">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
-                        <Label Text="Add New Cloth" 
+                        <Label Text="{Binding PageTitle}" 
                                FontSize="20"
                                FontAttributes="Bold" 
                                TextColor="{StaticResource Gray900}"/>
-                        <Label Text="Add cloth to your inventory with pricing and quantity details"
+                        <Label Text="Add or update cloth in your inventory with pricing and quantity details"
                                FontSize="14"
                                TextColor="{StaticResource Gray600}"
                                LineBreakMode="WordWrap"/>
@@ -88,7 +88,7 @@
 
                 <!-- Action Button -->
                 <components:ActionButton Grid.Row="2"
-                                        Text="Add to Inventory"
+                                        Text="{Binding SubmitButtonText}"
                                         Variant="Primary"
                                         Command="{Binding AddClothCommand}"
                                         Margin="0,20,0,0"/>

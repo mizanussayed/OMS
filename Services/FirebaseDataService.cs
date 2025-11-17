@@ -137,6 +137,62 @@ public class FirebaseDataService : IDataService
         }
     }
 
+    public async Task UpdateClothAsync(Cloth cloth)
+    {
+        try
+        {
+            var db = await GetDbAsync();
+            var docRef = db.Collection(ClothCollection).Document(cloth.Id.ToString());
+            await docRef.SetAsync(ToClothDoc(cloth), SetOptions.MergeAll);
+        }
+        catch
+        {
+            return;
+        }
+    }
+
+    public async Task UpdateOrderAsync(DressOrder order)
+    {
+        try
+        {
+            var db = await GetDbAsync();
+            var docRef = db.Collection(OrdersCollection).Document(order.Id.ToString());
+            await docRef.SetAsync(ToOrderDoc(order), SetOptions.MergeAll);
+        }
+        catch
+        {
+            return;
+        }
+    }
+
+    public async Task DeleteClothAsync(int clothId)
+    {
+        try
+        {
+            var db = await GetDbAsync();
+            var docRef = db.Collection(ClothCollection).Document(clothId.ToString());
+            await docRef.DeleteAsync();
+        }
+        catch
+        {
+            return;
+        }
+    }
+
+    public async Task DeleteOrderAsync(int orderId)
+    {
+        try
+        {
+            var db = await GetDbAsync();
+            var docRef = db.Collection(OrdersCollection).Document(orderId.ToString());
+            await docRef.DeleteAsync();
+        }
+        catch
+        {
+            return;
+        }
+    }
+
     public async Task UpdateOrderStatusAsync(int orderId, DressOrderStatus status)
     {
         try

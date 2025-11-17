@@ -23,6 +23,7 @@
             <!-- Icon -->
             <Label Text="{Binding Icon, Source={x:Reference this}}"
                    FontSize="{Binding IconSize, Source={x:Reference this}}"
+                   FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
                    TextColor="{Binding IconColor, Source={x:Reference this}}"
                    HorizontalOptions="Center"
                    IsVisible="{Binding HasIcon, Source={x:Reference this}}"/>

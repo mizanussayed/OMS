@@ -16,6 +16,7 @@
     <Color x:Key="Purple600">#9333ea</Color>
 
     <!-- Pink Shades -->
+    <Color x:Key="Pink100">#fce7f3</Color>
     <Color x:Key="Pink500">#ec4899</Color>
     <Color x:Key="Pink600">#db2777</Color>
 

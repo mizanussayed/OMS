@@ -46,7 +46,7 @@ public partial class MakerWorkspaceViewModel : ObservableObject
         var orderViewModels = myOrders.Select(o =>
         {
             var cloth = clothsList.FirstOrDefault(c => c.Id == o.ClothId);
-            return new DressOrderItemViewModel(o, cloth, dataService);
+            return new DressOrderItemViewModel(o, cloth, dataService, alertService, null!);
         }).ToList();
 
         Orders = new ObservableCollection<DressOrderItemViewModel>(orderViewModels);

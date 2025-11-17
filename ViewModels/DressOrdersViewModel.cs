@@ -19,7 +19,7 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
     private bool isRefreshing;
 
     [RelayCommand]
-    private async Task LoadDataAsync()
+    public async Task LoadDataAsync()
     {
         IsRefreshing = true;
         var ordersList = await dataService.GetOrdersAsync();
@@ -28,7 +28,7 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
         var orderViewModels = ordersList.Select(o => 
         {
             var cloth = clothsList.FirstOrDefault(c => c.Id == o.ClothId);
-            return new DressOrderItemViewModel(o, cloth, dataService);
+            return new DressOrderItemViewModel(o, cloth, dataService, alertService, this);
         }).ToList();
         
         Orders = new ObservableCollection<DressOrderItemViewModel>(orderViewModels);
@@ -49,25 +49,41 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
     }
 }
 
-public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDataService dataService) : ObservableObject
+public partial class DressOrderItemViewModel : ObservableObject
 {
-    private DressOrderStatus _status = order.Status;
+    private readonly DressOrder _order;
+    private readonly Cloth? _cloth;
+    private readonly IDataService _dataService;
+    private readonly IAlert _alertService;
+    private readonly DressOrdersViewModel _parentViewModel;
+    private DressOrderStatus _status;
 
-    public int Id => order.Id;
-    public string CustomerName => order.CustomerName + " (" + order.UniqueCode + ")";
-    public string MobileNumber => order.MobileNumber;
-    public string DressType => order.DressType;
-    public int ClothId => order.ClothId;
-    public double MetersUsed => order.MetersUsed;
+    public DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDataService dataService, IAlert alertService, DressOrdersViewModel parentViewModel)
+    {
+        _order = order;
+        _cloth = cloth;
+        _dataService = dataService;
+        _alertService = alertService;
+        _parentViewModel = parentViewModel;
+        _status = order.Status;
+    }
+
+    public int Id => _order.Id;
+    public string UniqueCode => _order.UniqueCode;
+    public string CustomerName => _order.CustomerName + " (" + _order.UniqueCode + ")";
+    public string MobileNumber => _order.MobileNumber;
+    public string DressType => _order.DressType;
+    public int ClothId => _order.ClothId;
+    public double MetersUsed => _order.MetersUsed;
     public DressOrderStatus Status => _status;
-    public int? AssignedTo => order.AssignedTo;
-    public DateTime OrderDate => order.OrderDate;
+    public int? AssignedTo => _order.AssignedTo;
+    public DateTime OrderDate => _order.OrderDate;
 
     // Cloth properties
     public string AssignedToName => "Manager";
-    public string ClothName => cloth!.Name + " (" + cloth!.UniqueCode + ")";
-    public string ClothColor => cloth?.Color ?? "Unknown";
-    public double TotalCost => cloth != null ? MetersUsed * cloth.PricePerMeter : 0;
+    public string ClothName => _cloth!.Name + " (" + _cloth!.UniqueCode + ")";
+    public string ClothColor => _cloth?.Color ?? "Unknown";
+    public double TotalCost => _cloth != null ? MetersUsed * _cloth.PricePerMeter : 0;
 
     // Status properties
     public string StatusText => Status switch
@@ -80,25 +96,25 @@ public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDa
 
     public Color StatusBackgroundColor => Status switch
     {
-        DressOrderStatus.Pending => Color.FromArgb("#fef3c7"), // Yellow100
-        DressOrderStatus.Completed => Color.FromArgb("#dbeafe"), // Blue100
-        DressOrderStatus.Delivered => Color.FromArgb("#dcfce7"), // Green100
+        DressOrderStatus.Pending => Color.FromArgb("#fef3c7"),
+        DressOrderStatus.Completed => Color.FromArgb("#dbeafe"),
+        DressOrderStatus.Delivered => Color.FromArgb("#dcfce7"),
         _ => Colors.Gray
     };
 
     public Color StatusBorderColor => Status switch
     {
-        DressOrderStatus.Pending => Color.FromArgb("#fde68a"), // Yellow200
-        DressOrderStatus.Completed => Color.FromArgb("#bfdbfe"), // Blue200
-        DressOrderStatus.Delivered => Color.FromArgb("#bbf7d0"), // Green200
+        DressOrderStatus.Pending => Color.FromArgb("#fde68a"),
+        DressOrderStatus.Completed => Color.FromArgb("#bfdbfe"),
+        DressOrderStatus.Delivered => Color.FromArgb("#bbf7d0"),
         _ => Colors.Gray
     };
 
     public Color StatusTextColor => Status switch
     {
-        DressOrderStatus.Pending => Color.FromArgb("#854d0e"), // Yellow800
-        DressOrderStatus.Completed => Color.FromArgb("#1e40af"), // Blue800
-        DressOrderStatus.Delivered => Color.FromArgb("#166534"), // Green800
+        DressOrderStatus.Pending => Color.FromArgb("#854d0e"),
+        DressOrderStatus.Completed => Color.FromArgb("#1e40af"),
+        DressOrderStatus.Delivered => Color.FromArgb("#166534"),
         _ => Colors.Black
     };
 
@@ -112,7 +128,7 @@ public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDa
     [RelayCommand]
     private async Task Complete()
     {
-        await dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Completed);
+        await _dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Completed);
         _status = DressOrderStatus.Completed;
         OnPropertyChanged(nameof(Status));
         OnPropertyChanged(nameof(StatusText));
@@ -127,7 +143,7 @@ public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDa
     [RelayCommand]
     private async Task Deliver()
     {
-        await dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Delivered);
+        await _dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Delivered);
         _status = DressOrderStatus.Delivered;
         OnPropertyChanged(nameof(Status));
         OnPropertyChanged(nameof(StatusText));
@@ -137,5 +153,50 @@ public partial class DressOrderItemViewModel(DressOrder order, Cloth? cloth, IDa
         OnPropertyChanged(nameof(IsPending));
         OnPropertyChanged(nameof(IsCompleted));
         OnPropertyChanged(nameof(IsDelivered));
+    }
+
+    [RelayCommand]
+    private async Task Edit()
+    {
+        var dialog = new NewOrderDialog
+        {
+            BindingContext = new NewOrderViewModel(_dataService, _alertService, _order)
+        };
+        await Shell.Current.Navigation.PushModalAsync(dialog);
+        await _parentViewModel.LoadDataAsync();
+    }
+
+    [RelayCommand]
+    private async Task Delete()
+    {
+        var confirmed = await _alertService.DisplayConfirmAlert(
+            "Delete Order",
+            $"Are you sure you want to delete order for '{_order.CustomerName}'? This action cannot be undone.",
+            "Delete",
+            "Cancel");
+
+        if (confirmed)
+        {
+            // Return the meters to cloth stock when deleting order
+            if (_cloth != null)
+            {
+                await _dataService.UpdateClothRemainingMetersAsync(ClothId, -MetersUsed);
+            }
+            
+            await _dataService.DeleteOrderAsync(Id);
+            await _alertService.DisplayAlert("Success", "Order deleted successfully", "OK");
+            await _parentViewModel.LoadDataAsync();
+        }
+    }
+
+    [RelayCommand]
+    private async Task ShowOptions()
+    {
+        var optionsSheet = new ItemOptionsSheet();
+        
+        optionsSheet.EditRequested += async (s, e) => await Edit();
+        optionsSheet.DeleteRequested += async (s, e) => await Delete();
+        
+        await Shell.Current.Navigation.PushModalAsync(optionsSheet);
     }
 }

@@ -21,8 +21,16 @@ public partial class MakerPickerItem(Employee employee) : ObservableObject
 public partial class NewOrderViewModel : ObservableObject
 {
     private readonly IDataService _dataService;
-
     private readonly IAlert _alertService;
+    private readonly DressOrder? _existingOrder;
+    private readonly bool _isEditMode;
+    private double _originalMetersUsed;
+
+    [ObservableProperty]
+    private string pageTitle = "Create New Order";
+
+    [ObservableProperty]
+    private string submitButtonText = "Create Order";
 
     [ObservableProperty]
     private string customerName = string.Empty;
@@ -90,10 +98,33 @@ public partial class NewOrderViewModel : ObservableObject
     [ObservableProperty]
     private double estimatedCost;
 
+    // Constructor for Add mode
     public NewOrderViewModel(IDataService dataService, IAlert alertService)
     {
         _dataService = dataService;
         _alertService = alertService;
+        _isEditMode = false;
+        LoadData();
+    }
+
+    // Constructor for Edit mode
+    public NewOrderViewModel(IDataService dataService, IAlert alertService, DressOrder order)
+    {
+        _dataService = dataService;
+        _alertService = alertService;
+        _existingOrder = order;
+        _isEditMode = true;
+        _originalMetersUsed = order.MetersUsed;
+
+        PageTitle = "Edit Order";
+        SubmitButtonText = "Update Order";
+
+        // Pre-populate fields
+        CustomerName = order.CustomerName;
+        MobileNumber = order.MobileNumber;
+        DressType = order.DressType;
+        MetersUsed = order.MetersUsed.ToString();
+
         LoadData();
     }
 
@@ -111,6 +142,13 @@ public partial class NewOrderViewModel : ObservableObject
         foreach (var employee in employeesList)
         {
             Makers.Add(new MakerPickerItem(employee));
+        }
+
+        // Set selected cloth and maker for edit mode
+        if (_isEditMode && _existingOrder != null)
+        {
+            SelectedCloth = Cloths.FirstOrDefault(c => c.Cloth.Id == _existingOrder.ClothId);
+            SelectedMaker = Makers.FirstOrDefault(m => m.Employee.Id == _existingOrder.AssignedTo);
         }
     }
 
@@ -152,9 +190,17 @@ public partial class NewOrderViewModel : ObservableObject
 
         if (SelectedCloth != null && double.TryParse(value, out var meters))
         {
-            if (meters > SelectedCloth.Cloth.RemainingMeters)
+            var availableMeters = SelectedCloth.Cloth.RemainingMeters;
+            
+            // In edit mode, add back the original meters to available stock for validation
+            if (_isEditMode && _existingOrder != null && SelectedCloth.Cloth.Id == _existingOrder.ClothId)
             {
-                MetersHelper = $"⚠️ Only {SelectedCloth.Cloth.RemainingMeters}m available";
+                availableMeters += _originalMetersUsed;
+            }
+
+            if (meters > availableMeters)
+            {
+                MetersHelper = $"⚠️ Only {availableMeters}m available";
             }
         }
 
@@ -228,10 +274,21 @@ public partial class NewOrderViewModel : ObservableObject
             MetersError = "Valid meters is required";
             isValid = false;
         }
-        else if (SelectedCloth != null && meters > SelectedCloth.Cloth.RemainingMeters)
+        else if (SelectedCloth != null)
         {
-            MetersError = $"Not enough stock. Only {SelectedCloth.Cloth.RemainingMeters}m available";
-            isValid = false;
+            var availableMeters = SelectedCloth.Cloth.RemainingMeters;
+            
+            // In edit mode, add back the original meters to available stock for validation
+            if (_isEditMode && _existingOrder != null && SelectedCloth.Cloth.Id == _existingOrder.ClothId)
+            {
+                availableMeters += _originalMetersUsed;
+            }
+
+            if (meters > availableMeters)
+            {
+                MetersError = $"Not enough stock. Only {availableMeters}m available";
+                isValid = false;
+            }
         }
 
         if (!isValid) return;
@@ -240,28 +297,66 @@ public partial class NewOrderViewModel : ObservableObject
 
         try
         {
-            var order = new DressOrder
+            if (_isEditMode && _existingOrder != null)
             {
-                CustomerName = CustomerName,
-                MobileNumber = MobileNumber,
-                DressType = DressType,
-                ClothId = SelectedCloth!.Cloth.Id,
-                MetersUsed = metersValue,
-                Status = DressOrderStatus.Pending,
-                AssignedTo = SelectedMaker?.Employee.Id ?? 0,
-                OrderDate = DateTime.Now
-            };
+                // Edit mode - update existing order
+                var metersDifference = metersValue - _originalMetersUsed;
+                
+                // Update cloth stock with the difference
+                if (SelectedCloth!.Cloth.Id == _existingOrder.ClothId)
+                {
+                    // Same cloth - just adjust by difference
+                    await _dataService.UpdateClothRemainingMetersAsync(SelectedCloth.Cloth.Id, metersDifference);
+                }
+                else
+                {
+                    // Different cloth - return meters to old cloth and deduct from new cloth
+                    await _dataService.UpdateClothRemainingMetersAsync(_existingOrder.ClothId, -_originalMetersUsed);
+                    await _dataService.UpdateClothRemainingMetersAsync(SelectedCloth.Cloth.Id, metersValue);
+                }
 
-            await _dataService.AddOrderAsync(order);
+                var updatedOrder = new DressOrder
+                {
+                    Id = _existingOrder.Id,
+                    UniqueCode = _existingOrder.UniqueCode,
+                    CustomerName = CustomerName,
+                    MobileNumber = MobileNumber,
+                    DressType = DressType,
+                    ClothId = SelectedCloth!.Cloth.Id,
+                    MetersUsed = metersValue,
+                    Status = _existingOrder.Status,
+                    AssignedTo = SelectedMaker?.Employee.Id ?? 0,
+                    OrderDate = _existingOrder.OrderDate
+                };
 
-            await _alertService.DisplayAlert("Success", "Order created successfully", "OK");
+                await _dataService.UpdateOrderAsync(updatedOrder);
+                await _alertService.DisplayAlert("Success", "Order updated successfully", "OK");
+            }
+            else
+            {
+                // Add mode - create new order
+                var order = new DressOrder
+                {
+                    CustomerName = CustomerName,
+                    MobileNumber = MobileNumber,
+                    DressType = DressType,
+                    ClothId = SelectedCloth!.Cloth.Id,
+                    MetersUsed = metersValue,
+                    Status = DressOrderStatus.Pending,
+                    AssignedTo = SelectedMaker?.Employee.Id ?? 0,
+                    OrderDate = DateTime.Now
+                };
+
+                await _dataService.AddOrderAsync(order);
+                await _alertService.DisplayAlert("Success", "Order created successfully", "OK");
+            }
 
             // Close dialog
             await Close();
         }
         catch
         {
-            await _alertService.DisplayAlert("Error", "Failed to create order. Please try again.", "OK");
+            await _alertService.DisplayAlert("Error", "Failed to save order. Please try again.", "OK");
         }
     }
 

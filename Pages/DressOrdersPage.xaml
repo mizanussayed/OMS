@@ -31,7 +31,8 @@
                                         StrokeThickness="1"
                                         Stroke="{StaticResource Gray100}"
                                         BackgroundColor="{StaticResource White}"
-                                        Margin="0,0,0,12">
+                                        Margin="0,0,0,12"
+                                        x:Name="OrderCard">
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="12" />
                                     </Border.StrokeShape>
@@ -41,7 +42,12 @@
                                                 Radius="8"
                                                 Offset="0,2" />
                                     </Border.Shadow>
+                                    
                                     <VerticalStackLayout Spacing="12">
+                                        <VerticalStackLayout.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding ShowOptionsCommand}" />
+                                        </VerticalStackLayout.GestureRecognizers>
+                                        
                                         <!-- Header -->
                                         <Grid ColumnDefinitions="*,Auto">
                                             <VerticalStackLayout Grid.Column="0" Spacing="4">
@@ -149,11 +155,14 @@
 
                                         <!-- Action Buttons -->
                                         <BoxView HeightRequest="1" BackgroundColor="{StaticResource Gray100}"/>
+                                        
+                                        <!-- Status Action Buttons -->
                                         <Grid ColumnDefinitions="*" ColumnSpacing="8">
                                             <!-- Complete Button (for Pending orders) -->
                                             <Button Grid.Column="0"
                                                     Text="✓ Complete" 
                                                     FontSize="14"
+                                                    FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
                                                     FontAttributes="Bold"
                                                     TextColor="{StaticResource Primary}"
                                                     BackgroundColor="{StaticResource Secondary}"
@@ -168,6 +177,7 @@
                                             <Button Grid.Column="0"
                                                     Text="🚚 Deliver" 
                                                     FontSize="14"
+                                                    FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
                                                     FontAttributes="Bold"
                                                     TextColor="{StaticResource Green600}"
                                                     BackgroundColor="{StaticResource Secondary}"
@@ -182,6 +192,7 @@
                                             <Label Grid.Column="0"
                                                    Text="✓ Order Completed" 
                                                    FontSize="14"
+                                                   FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
                                                    FontAttributes="Bold"
                                                    TextColor="{StaticResource Green600}"
                                                    HorizontalOptions="Center"

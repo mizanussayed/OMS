@@ -5,8 +5,18 @@ using OMS.Services;
 
 namespace OMS.ViewModels;
 
-public partial class AddClothViewModel(IDataService dataService) : ObservableObject
+public partial class AddClothViewModel : ObservableObject
 {
+    private readonly IDataService _dataService;
+    private readonly Cloth? _existingCloth;
+    private readonly bool _isEditMode;
+
+    [ObservableProperty]
+    private string pageTitle = "Add New Cloth";
+
+    [ObservableProperty]
+    private string submitButtonText = "Add to Inventory";
+
     [ObservableProperty]
     private string name = string.Empty;
 
@@ -48,6 +58,30 @@ public partial class AddClothViewModel(IDataService dataService) : ObservableObj
 
     [ObservableProperty]
     private string previewValue = string.Empty;
+
+    // Constructor for Add mode
+    public AddClothViewModel(IDataService dataService)
+    {
+        _dataService = dataService;
+        _isEditMode = false;
+    }
+
+    // Constructor for Edit mode
+    public AddClothViewModel(IDataService dataService, Cloth cloth)
+    {
+        _dataService = dataService;
+        _existingCloth = cloth;
+        _isEditMode = true;
+
+        PageTitle = "Edit Cloth";
+        SubmitButtonText = "Update Cloth";
+
+        // Pre-populate fields
+        Name = cloth.Name;
+        Color = cloth.Color;
+        PricePerMeter = cloth.PricePerMeter.ToString();
+        TotalMeters = cloth.TotalMeters.ToString();
+    }
 
     partial void OnNameChanged(string value)
     {
@@ -153,17 +187,39 @@ public partial class AddClothViewModel(IDataService dataService) : ObservableObj
         double.TryParse(PricePerMeter, out double priceValue);
         double.TryParse(TotalMeters, out double metersValue);
 
-        var cloth = new Cloth
+        if (_isEditMode && _existingCloth != null)
         {
-            Name = Name,
-            Color = Color,
-            PricePerMeter = priceValue,
-            TotalMeters = metersValue,
-            RemainingMeters = metersValue,
-            AddedDate = DateTime.Now
-        };
+            // Edit mode - update existing cloth
+            var updatedCloth = new Cloth
+            {
+                Id = _existingCloth.Id,
+                UniqueCode = _existingCloth.UniqueCode,
+                Name = Name,
+                Color = Color,
+                PricePerMeter = priceValue,
+                TotalMeters = metersValue,
+                RemainingMeters = _existingCloth.RemainingMeters + (metersValue - _existingCloth.TotalMeters),
+                AddedDate = _existingCloth.AddedDate
+            };
 
-        await dataService.AddClothAsync(cloth);
+            await _dataService.UpdateClothAsync(updatedCloth);
+        }
+        else
+        {
+            // Add mode - create new cloth
+            var cloth = new Cloth
+            {
+                Name = Name,
+                Color = Color,
+                PricePerMeter = priceValue,
+                TotalMeters = metersValue,
+                RemainingMeters = metersValue,
+                AddedDate = DateTime.Now
+            };
+
+            await _dataService.AddClothAsync(cloth);
+        }
+
         await Close();
     }
 
