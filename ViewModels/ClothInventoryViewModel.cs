@@ -22,6 +22,9 @@ public partial class ClothInventoryViewModel(IDataService dataService, IAlert al
     [RelayCommand]
     public async Task LoadDataAsync()
     {
+        if (Cloths.Count > 0)
+            return;
+
         IsRefreshing = true;
         var clothsList = await dataService.GetClothsAsync();
         var clothViewModels = clothsList.Select(c => new ClothInventoryItemViewModel(c, dataService, alertService, this)).ToList();
@@ -78,17 +81,18 @@ public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataS
     [RelayCommand]
     private async Task Edit()
     {
-        var dialog = new AddClothDialog
+        try
         {
-            BindingContext = new AddClothViewModel(dataService, cloth)
-        };
-        
-        //dialog.Disappearing += async (s, e) => 
-        //{
-        //    await parentViewModel.LoadDataAsync();
-        //};
-        
-        await Shell.Current.Navigation.PushModalAsync(dialog);
+            var dialog = new AddClothDialog
+            {
+                BindingContext = new AddClothViewModel(dataService, cloth)
+            };
+            await Shell.Current.Navigation.PushModalAsync(dialog);
+        }
+        catch (Exception ex)
+        {
+            await alertService.DisplayAlert("Error", $"An error occurred while trying to edit the cloth: {ex.Message}", "OK");
+        }
     }
 
     [RelayCommand]
@@ -116,6 +120,6 @@ public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataS
         optionsSheet.EditRequested += async (s, e) => await Edit();
         optionsSheet.DeleteRequested += async (s, e) => await Delete();
         
-        //await Shell.Current.Navigation.PushModalAsync(optionsSheet);
+        await Shell.Current.Navigation.PushModalAsync(optionsSheet);
     }
 }

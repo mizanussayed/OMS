@@ -10,6 +10,7 @@ public partial class AddClothViewModel : ObservableObject
     private readonly IDataService _dataService;
     private readonly Cloth? _existingCloth;
     private readonly bool _isEditMode;
+    private bool _isInitializing;
 
     [ObservableProperty]
     private string pageTitle = "Add New Cloth";
@@ -72,37 +73,47 @@ public partial class AddClothViewModel : ObservableObject
         _dataService = dataService;
         _existingCloth = cloth;
         _isEditMode = true;
+        _isInitializing = true; // Prevent UpdatePreview from running during initialization
 
         PageTitle = "Edit Cloth";
         SubmitButtonText = "Update Cloth";
 
-        // Pre-populate fields
-        Name = cloth.Name;
-        Color = cloth.Color;
-        PricePerMeter = cloth.PricePerMeter.ToString();
-        TotalMeters = cloth.TotalMeters.ToString();
+        // Pre-populate fields without triggering UpdatePreview
+        name = cloth.Name;
+        color = cloth.Color;
+        pricePerMeter = cloth.PricePerMeter.ToString();
+        totalMeters = cloth.TotalMeters.ToString();
+
+        _isInitializing = false;
+        
+        // Now update preview once
+        UpdatePreview();
     }
 
     partial void OnNameChanged(string value)
     {
+        if (_isInitializing) return;
         NameError = string.Empty;
         UpdatePreview();
     }
 
     partial void OnColorChanged(string value)
     {
+        if (_isInitializing) return;
         ColorError = string.Empty;
         UpdatePreview();
     }
 
     partial void OnPricePerMeterChanged(string value)
     {
+        if (_isInitializing) return;
         PriceError = string.Empty;
         UpdatePreview();
     }
 
     partial void OnTotalMetersChanged(string value)
     {
+        if (_isInitializing) return;
         MetersError = string.Empty;
         UpdatePreview();
     }

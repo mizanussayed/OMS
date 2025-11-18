@@ -46,12 +46,6 @@
                                         Offset="0,2" />
                                     </Border.Shadow>
 
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding Source={x:Reference ClothCard}}" Value="True">
-                                            <Setter Property="BackgroundColor" Value="{StaticResource Gray50}" />
-                                        </DataTrigger>
-                                    </Border.Triggers>
-
                                     <VerticalStackLayout Spacing="10">
                                         <VerticalStackLayout.GestureRecognizers>
                                             <TapGestureRecognizer Command="{Binding ShowOptionsCommand}" />

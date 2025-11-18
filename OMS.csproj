@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0-android</TargetFramework>
+		<TargetFramework>net10.0-android</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<RootNamespace>OMS</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -14,12 +14,24 @@
 		<ApplicationVersion>1</ApplicationVersion>
 		<RuntimeIdentifiers>android-arm64</RuntimeIdentifiers>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		
+		<!-- Add these properties to fix XA0129 deployment errors -->
+		<AndroidEnableMultiDex>true</AndroidEnableMultiDex>
+		<AndroidUseIntermediateDesignerFile>false</AndroidUseIntermediateDesignerFile>
+		<_AndroidStripLibrariesFromApk>true</_AndroidStripLibrariesFromApk>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
 		<AndroidPackageFormat>apk</AndroidPackageFormat>
 		<AndroidLinkTool>r8</AndroidLinkTool>
 		<PublishTrimmed>true</PublishTrimmed>
+	</PropertyGroup>
+	
+	<!-- Add Debug configuration with optimizations -->
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
+		<AndroidUseAapt2>true</AndroidUseAapt2>
+		<AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+		<EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -31,8 +43,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Google.Cloud.Firestore" Version="3.12.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.120" />
+		<PackageReference Include="Google.Cloud.Firestore" Version="3.13.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.10" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 	</ItemGroup>
 

@@ -26,7 +26,7 @@ public partial class ItemOptionsSheet : ContentPage
         if (Content is Grid grid && grid.Children.Count > 1 && grid.Children[1] is Border border)
         {
             border.TranslationY = 400;           
-            await border.TranslateTo(0, 0, 250, Easing.CubicOut);
+            await border.TranslateToAsync(0, 0, 250, Easing.CubicOut);
         }
     }
 
@@ -72,7 +72,7 @@ public partial class ItemOptionsSheet : ContentPage
     {
         if (Content is Grid grid && grid.Children.Count > 1 && grid.Children[1] is Border border)
         {
-            await border.TranslateTo(0, 400, 200, Easing.CubicIn);
+            await border.TranslateToAsync(0, 400, 200, Easing.CubicIn);
         }
         
         await Shell.Current.Navigation.PopModalAsync(false);
