@@ -43,15 +43,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Google.Cloud.Firestore" Version="3.13.0" />
+		<!-- <PackageReference Include="Google.Cloud.Firestore" Version="3.13.0" /> -->
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.10" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="Npgsql" Version="8.0.5" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <MauiXaml Update="Pages\ItemOptionsSheet.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>
-
 </Project>

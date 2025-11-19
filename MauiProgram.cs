@@ -18,7 +18,7 @@ public static class MauiProgram
             });
 
         // Services
-        builder.Services.AddSingleton<IDataService, FirebaseDataService>();
+        builder.Services.AddSingleton<IDataService>(new PostgresDataService(connectionString));
         builder.Services.AddSingleton<IAlert, AlertService>();
 
         // ViewModels
