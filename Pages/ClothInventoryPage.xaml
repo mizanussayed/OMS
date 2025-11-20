@@ -18,8 +18,58 @@
              ActionButtonText="Add Cloth"
              ShowActionButton="True"
              ActionButtonCommand="{Binding ShowAddClothCommand}"/>
+
+        <Grid Grid.Row="1" 
+              ColumnDefinitions="*,*"
+              ColumnSpacing="10">
+           
+            <Border Grid.Column="0"
+                    Padding="16"
+                    BackgroundColor="{StaticResource White}"
+                    StrokeThickness="0"
+                    VerticalOptions="Start">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource Gray900}"
+                            Opacity="0.05"
+                            Radius="4"
+                            Offset="0,2" />
+                </Border.Shadow>
+                <Button Text="🔍 Filters"
+                        FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
+                        Command="{Binding ShowFiltersCommand}"
+                        BackgroundColor="{StaticResource Gray50}"
+                        TextColor="{StaticResource Gray900}"
+                        BorderColor="{StaticResource Gray200}"
+                        BorderWidth="1"
+                        CornerRadius="8"
+                        HeightRequest="44"/>
+            </Border>
+        
+            <Border Grid.Column="1"
+                    Padding="16"
+                    BackgroundColor="{StaticResource White}"
+                    StrokeThickness="0"
+                    VerticalOptions="Start">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource Gray900}"
+                            Opacity="0.05"
+                            Radius="4"
+                            Offset="0,2" />
+                </Border.Shadow>
+                <Button Text=" Print"
+                        FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
+                        Command="{Binding ShowFiltersCommand}"
+                        BackgroundColor="{StaticResource Gray50}"
+                        TextColor="{StaticResource Gray900}"
+                        BorderColor="{StaticResource Gray200}"
+                        BorderWidth="1"
+                        CornerRadius="8"
+                        HeightRequest="44"/>
+            </Border>
+        </Grid>
         <!-- Content -->
         <RefreshView Grid.Row="1"
+                     Margin="0,76,0,0"
                      IsRefreshing="{Binding IsRefreshing}"
                      Command="{Binding LoadDataCommand}">
             <ScrollView>
@@ -102,7 +152,8 @@
 
                                         <!-- Used and Added Info -->
                                         <Grid ColumnDefinitions="*,*" ColumnSpacing="16" Margin="0,4,0,0">
-                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2" 
+                                                                 HorizontalOptions="Start">
                                                 <Label Text="Used" 
                                                    FontSize="11" 
                                                    TextColor="{StaticResource Gray500}"/>
@@ -110,7 +161,8 @@
                                                    FontSize="13"
                                                    TextColor="{StaticResource Gray900}"/>
                                             </VerticalStackLayout>
-                                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                            <VerticalStackLayout Grid.Column="1" Spacing="2"
+                                                                 HorizontalOptions="End">
                                                 <Label Text="Added" 
                                                    FontSize="11" 
                                                    TextColor="{StaticResource Gray500}"/>

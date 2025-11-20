@@ -138,12 +138,6 @@
                     </Border>
                 </Grid>
 
-                <!-- Add Maker Button -->
-                <components:ActionButton Text="Add New Maker"
-                                        Command="{Binding AddMakerCommand}"
-                                        Variant="Primary"
-                                        HorizontalOptions="Fill"/>
-
                 <!-- Cloth Inventory Section -->
                 <Label Text="Cloth Inventory" 
                        FontSize="16"
@@ -230,6 +224,55 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
+                
+                <!-- Settings Button -->
+                <Border Padding="16"
+                        StrokeThickness="1"
+                        Stroke="{StaticResource Gray200}"
+                        BackgroundColor="{StaticResource White}"
+                        Margin="0,16,0,24">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenSettingsCommand}" />
+                    </Border.GestureRecognizers>
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Border.Shadow>
+                        <Shadow Brush="{StaticResource Gray900}"
+                                Opacity="0.05"
+                                Radius="8"
+                                Offset="0,2" />
+                    </Border.Shadow>
+                    <HorizontalStackLayout Spacing="16">
+                        <Border WidthRequest="48"
+                                HeightRequest="48"
+                                BackgroundColor="{StaticResource Secondary}"
+                                StrokeThickness="0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="24" />
+                            </Border.StrokeShape>
+                            <Label Text="⚙️"
+                                   FontSize="24"
+                                   FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                        </Border>
+                        <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                            <Label Text="App Settings"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Gray900}"/>
+                            <Label Text="Configure unique code prefixes and preferences"
+                                   FontSize="13"
+                                   TextColor="{StaticResource Gray600}"/>
+                        </VerticalStackLayout>
+                        <Label Text="›"
+                               FontSize="24"
+                               TextColor="{StaticResource Gray400}"
+                               HorizontalOptions="End"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </Border>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

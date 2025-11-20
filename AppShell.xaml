@@ -28,6 +28,13 @@
                 Route="DressOrders"
                 ContentTemplate="{DataTemplate pages:DressOrdersPage}" />
         </Tab>
+        
+        <Tab Title="Team"
+             Icon="icon_people.svg">
+            <ShellContent 
+                Route="EmployeesPage"
+                ContentTemplate="{DataTemplate pages:EmployeesPage}" />
+        </Tab>
     </TabBar>
 
 </Shell>

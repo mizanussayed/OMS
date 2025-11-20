@@ -10,9 +10,6 @@ namespace OMS.ViewModels;
 public partial class DashboardViewModel(IDataService dataService, IAlert alertService) : ObservableObject
 {
     [ObservableProperty]
-    private ObservableCollection<ClothViewModel> cloths = [];
-
-    [ObservableProperty]
     private int totalCloths;
 
     [ObservableProperty]
@@ -20,12 +17,21 @@ public partial class DashboardViewModel(IDataService dataService, IAlert alertSe
 
     [ObservableProperty]
     private double inventoryValue;
+    
+    [ObservableProperty]
+    private int totalEmployees;
 
     [ObservableProperty]
-    private ObservableCollection<Cloth> lowStockCloths = [];
+    private ObservableCollection<ClothViewModel> lowStockCloths = [];
 
     [ObservableProperty]
     private bool hasLowStockItems;
+    
+    [ObservableProperty]
+    private ObservableCollection<ClothViewModel> latestCloths = [];
+    
+    [ObservableProperty]
+    private bool hasLatestCloths;
 
     [ObservableProperty]
     private string userRoleDescription = "Admin Dashboard";
@@ -35,35 +41,30 @@ public partial class DashboardViewModel(IDataService dataService, IAlert alertSe
     {
         try
         {
-            var clothsList = await dataService.GetClothsAsync();
-            
-            if (clothsList == null || clothsList.Count == 0)
-            {
-                Cloths = new ObservableCollection<ClothViewModel>();
-                TotalCloths = 0;
-                InventoryValue = 0;
-                PendingOrders = 0;
-                HasLowStockItems = false;
-                return;
-            }
-            
-            var clothViewModels = clothsList
-                .Where(c => c != null)
-                .Select(c => new ClothViewModel(c))
-                .ToList();
-
-            Cloths = new ObservableCollection<ClothViewModel>(clothViewModels);
-            
-            TotalCloths = clothsList.Count;
-            InventoryValue = clothsList.Sum(c => c.RemainingMeters * c.PricePerMeter);
+            // Get statistics
+            var allCloths = await dataService.GetClothsAsync();
+            TotalCloths = allCloths?.Count ?? 0;
+            InventoryValue = allCloths?.Sum(c => c.RemainingMeters * c.PricePerMeter) ?? 0;
 
             var orders = await dataService.GetOrdersAsync();
             PendingOrders = orders?.Count(o => o.Status == DressOrderStatus.Pending) ?? 0;
+            
+            var employees = await dataService.GetEmployeesAsync();
+            TotalEmployees = employees?.Count ?? 0;
 
-            LowStockCloths = new ObservableCollection<Cloth>(
-                clothsList.Where(c => c != null && c.RemainingMeters < c.TotalMeters * 0.2)
+            // Get low stock cloths (top 5)
+            var lowStock = await dataService.GetLowStockClothsAsync(5);
+            LowStockCloths = new ObservableCollection<ClothViewModel>(
+                lowStock.Select(c => new ClothViewModel(c))
             );
             HasLowStockItems = LowStockCloths.Any();
+
+            // Get latest cloths (top 5)
+            var latest = await dataService.GetLatestClothsAsync(5);
+            LatestCloths = new ObservableCollection<ClothViewModel>(
+                latest.Select(c => new ClothViewModel(c))
+            );
+            HasLatestCloths = LatestCloths.Any();
 
             if (App.CurrentUser != null)
             {
@@ -78,11 +79,12 @@ public partial class DashboardViewModel(IDataService dataService, IAlert alertSe
             System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             
             // Initialize with empty data on error
-            Cloths = new ObservableCollection<ClothViewModel>();
             TotalCloths = 0;
             InventoryValue = 0;
             PendingOrders = 0;
+            TotalEmployees = 0;
             HasLowStockItems = false;
+            HasLatestCloths = false;
         }
     }
 
@@ -100,33 +102,45 @@ public partial class DashboardViewModel(IDataService dataService, IAlert alertSe
         return Task.CompletedTask;
     }
 
+    
     [RelayCommand]
-    private async Task AddMaker()
+    private async Task ViewEmployees()
     {
-        var viewModel = new AddMakerViewModel(dataService, alertService);
-        var dialog = new AddMakerDialog(viewModel);
-        await Shell.Current.Navigation.PushModalAsync(dialog);
+        await Shell.Current.GoToAsync("//EmployeesPage");
+    }
+    
+    [RelayCommand]
+    private async Task OpenSettings()
+    {
+        var settingsService = App.Current!.Handler!.MauiContext!.Services.GetService<ISettingsService>();
+        var alertService = App.Current!.Handler!.MauiContext!.Services.GetService<IAlert>();
         
-        await LoadDataAsync();
+        if (settingsService != null && alertService != null)
+        {
+            var viewModel = new SettingsViewModel(settingsService, alertService);
+            var settingsPage = new SettingsPage
+            {
+                BindingContext = viewModel
+            };
+            await Shell.Current.Navigation.PushModalAsync(settingsPage);
+        }
     }
 }
 
-public class ClothViewModel : ObservableObject
+public class ClothViewModel(Cloth cloth) : ObservableObject
 {
-    private readonly Cloth _cloth;
-
-    public ClothViewModel(Cloth cloth)
-    {
-        _cloth = cloth ?? throw new ArgumentNullException(nameof(cloth));
-    }
+    private readonly Cloth _cloth = cloth ?? throw new ArgumentNullException(nameof(cloth));
 
     public string Id => _cloth.Id.ToString();
-    public string Name => _cloth!.Name + " (" + _cloth!.UniqueCode + ")";
+    public string Name => _cloth!.Name;
+    public string UniqueCode => _cloth.UniqueCode;
+    public string DisplayName => $"{_cloth.Name} ({_cloth.UniqueCode})";
     public string Color => _cloth.Color ?? string.Empty;
     public double PricePerMeter => _cloth.PricePerMeter;
     public double TotalMeters => _cloth.TotalMeters;
     public double RemainingMeters => _cloth.RemainingMeters;
     public DateTime AddedDate => _cloth.AddedDate;
+    public string AddedDateFormatted => AddedDate.ToString("MMM dd, yyyy");
     
     public double UsagePercent
     {
@@ -134,6 +148,15 @@ public class ClothViewModel : ObservableObject
         {
             if (TotalMeters == 0) return 0;
             return ((TotalMeters - RemainingMeters) / TotalMeters * 100);
+        }
+    }
+    
+    public double StockPercent
+    {
+        get
+        {
+            if (TotalMeters == 0) return 0;
+            return (RemainingMeters / TotalMeters * 100);
         }
     }
     

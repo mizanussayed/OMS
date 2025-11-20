@@ -11,32 +11,125 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
 {
     [ObservableProperty]
     private ObservableCollection<DressOrderItemViewModel> orders = [];
+    
+    private List<DressOrderItemViewModel> _allOrders = [];
 
     [ObservableProperty]
     private bool hasNoOrders;
 
     [ObservableProperty]
     private bool isRefreshing;
+    
+    [ObservableProperty]
+    private string searchText = string.Empty;
+    
+    [ObservableProperty]
+    private DressOrderStatus? selectedStatusFilter = null;
+    
+    [ObservableProperty]
+    private ObservableCollection<string> availableStatuses =
+    [
+        "Pending", 
+        "Completed", 
+        "Delivered",
+        "All",
+    ];
+    
+    [ObservableProperty]
+    private string selectedStatusFilterString = "Pending";
+    
+    partial void OnSearchTextChanged(string value)
+    {
+        ApplyFilters();
+    }
+    
+    partial void OnSelectedStatusFilterStringChanged(string value)
+    {
+        selectedStatusFilter = value switch
+        {
+            "Pending" => DressOrderStatus.Pending,
+            "Completed" => DressOrderStatus.Completed,
+            "Delivered" => DressOrderStatus.Delivered,
+            _ => null
+        };
+        ApplyFilters();
+    }
 
     [RelayCommand]
     public async Task LoadDataAsync()
     {
-        if(Orders.Count > 0)
-            return;
-
         IsRefreshing = true;
-        var ordersList = await dataService.GetOrdersAsync();
-        var clothsList = await dataService.GetClothsAsync();
         
-        var orderViewModels = ordersList.Select(o => 
+        try
         {
-            var cloth = clothsList.FirstOrDefault(c => c.Id == o.ClothId);
-            return new DressOrderItemViewModel(o, cloth, dataService, alertService, this);
-        }).ToList();
+            var ordersList = await dataService.GetOrdersAsync();
+            var clothsList = await dataService.GetClothsAsync();
+            
+            var orderViewModels = ordersList.Select(o => 
+            {
+                var cloth = clothsList.FirstOrDefault(c => c.Id == o.ClothId);
+                return new DressOrderItemViewModel(o, cloth, dataService, alertService, this);
+            }).ToList();
+            
+            _allOrders = orderViewModels;
+            ApplyFilters();
+        }
+        catch
+        {
+        }
+        finally
+        {
+            IsRefreshing = false;
+        }
+    }
+    
+    private void ApplyFilters()
+    {
+        var filtered = _allOrders.AsEnumerable();
         
-        Orders = new ObservableCollection<DressOrderItemViewModel>(orderViewModels);
+        // Search filter
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            var search = SearchText.ToLower();
+            filtered = filtered.Where(o => 
+                o.CustomerName.Contains(search, StringComparison.CurrentCultureIgnoreCase) ||
+                o.MobileNumber.Contains(search) ||
+                o.UniqueCode.Contains(search, StringComparison.CurrentCultureIgnoreCase) ||
+                o.DressType.Contains(search, StringComparison.CurrentCultureIgnoreCase));
+        }
+        
+        // Status filter
+        if (SelectedStatusFilter.HasValue)
+        {
+            filtered = filtered.Where(o => o.Status == SelectedStatusFilter.Value);
+        }
+        
+        Orders = new ObservableCollection<DressOrderItemViewModel>(filtered);
         HasNoOrders = !Orders.Any();
-        IsRefreshing = false;
+    }
+    
+    [RelayCommand]
+    private void ClearFilters()
+    {
+        SearchText = string.Empty;
+        SelectedStatusFilterString = "All";
+    }
+
+    [RelayCommand]
+    private async Task ShowFilters()
+    {
+        var filterSheet = new OrderFilterSheet(
+            SearchText,
+            SelectedStatusFilterString
+        );
+        
+        filterSheet.FiltersApplied += (s, e) =>
+        {
+            SearchText = e.SearchText;
+            SelectedStatusFilterString = e.SelectedStatus;
+        };
+        
+        await Shell.Current.Navigation.PushModalAsync(filterSheet);
     }
 
     [RelayCommand]
@@ -46,9 +139,13 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
         {
             BindingContext = new NewOrderViewModel(dataService, alertService)
         };
+        
+        dialog.Disappearing += async (s, e) => 
+        {
+            await LoadDataAsync();
+        };
+        
         await Shell.Current.Navigation.PushModalAsync(dialog);
-  
-        await LoadDataAsync();
     }
 }
 

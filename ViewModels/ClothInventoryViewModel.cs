@@ -11,26 +11,169 @@ public partial class ClothInventoryViewModel(IDataService dataService, IAlert al
 {
     [ObservableProperty]
     private ObservableCollection<ClothInventoryItemViewModel> cloths = [];
-
+    
+    private List<ClothInventoryItemViewModel> _allCloths = [];
 
     [ObservableProperty]
     private bool hasNoCloth;
 
     [ObservableProperty]
     private bool isRefreshing;
+    
+    [ObservableProperty]
+    private string searchText = string.Empty;
+    
+    [ObservableProperty]
+    private string selectedColorFilter = "All";
+    
+    [ObservableProperty]
+    private ObservableCollection<string> availableColors = new() { "All" };
+    
+    [ObservableProperty]
+    private bool isLowStockFilterActive;
+
+    partial void OnSearchTextChanged(string value)
+    {
+        ApplyFilters();
+    }
+    
+    partial void OnSelectedColorFilterChanged(string value)
+    {
+        ApplyFilters();
+    }
+    
+    partial void OnIsLowStockFilterActiveChanged(bool value)
+    {
+        ApplyFilters();
+    }
 
     [RelayCommand]
     public async Task LoadDataAsync()
     {
-        if (Cloths.Count > 0)
-            return;
-
         IsRefreshing = true;
-        var clothsList = await dataService.GetClothsAsync();
-        var clothViewModels = clothsList.Select(c => new ClothInventoryItemViewModel(c, dataService, alertService, this)).ToList();
-        Cloths = new ObservableCollection<ClothInventoryItemViewModel>(clothViewModels);
+        
+        try
+        {
+            var clothsList = await dataService.GetClothsAsync();
+            var clothViewModels = clothsList.Select(c => new ClothInventoryItemViewModel(c, dataService, alertService, this)).ToList();
+            _allCloths = clothViewModels;
+            var colors = new List<string> { "All" };
+            colors.AddRange(clothsList.Select(c => c.Color).Distinct().OrderBy(c => c));
+            AvailableColors = new ObservableCollection<string>(colors);
+            
+            ApplyFilters();
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't crash
+            System.Diagnostics.Debug.WriteLine($"Error loading cloths: {ex.Message}");
+        }
+        finally
+        {
+            IsRefreshing = false;
+        }
+    }
+    
+
+    public async Task RefreshSingleClothAsync(int clothId)
+    {
+        try
+        {
+            var updatedCloth = await dataService.GetClothByIdAsync(clothId);
+            if (updatedCloth != null)
+            {
+                var existingItemInAll = _allCloths.FirstOrDefault(c => c.Id == clothId);
+                if (existingItemInAll != null)
+                {
+                    var index = _allCloths.IndexOf(existingItemInAll);
+                    var newItem = new ClothInventoryItemViewModel(updatedCloth, dataService, alertService, this);
+                    _allCloths[index] = newItem;
+                }
+                
+                // Reapply filters
+                ApplyFilters();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error refreshing cloth {clothId}: {ex.Message}");
+        }
+    }
+    
+    public void RemoveCloth(int clothId)
+    {
+        var itemInAll = _allCloths.FirstOrDefault(c => c.Id == clothId);
+        if (itemInAll != null)
+        {
+            _allCloths.Remove(itemInAll);
+        }
+        
+        // Reapply filters
+        ApplyFilters();
+    }
+    
+    private void ApplyFilters()
+    {
+        var filtered = _allCloths.AsEnumerable();
+        
+        // Search filter
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            var search = SearchText.ToLower();
+            filtered = filtered.Where(c => 
+                c.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase) ||
+                c.Color.Contains(search, StringComparison.CurrentCultureIgnoreCase) ||
+                c.UniqueCode.Contains(search, StringComparison.CurrentCultureIgnoreCase));
+        }
+        
+        // Color filter
+        if (SelectedColorFilter != "All")
+        {
+            filtered = filtered.Where(c => c.Color == SelectedColorFilter);
+        }
+        
+        // Low stock filter
+        if (IsLowStockFilterActive)
+        {
+            filtered = filtered.Where(c => c.IsLowStock);
+        }
+        
+        Cloths = new ObservableCollection<ClothInventoryItemViewModel>(filtered);
         HasNoCloth = !Cloths.Any();
-        IsRefreshing = false;
+    }
+    
+    [RelayCommand]
+    private void ClearFilters()
+    {
+        SearchText = string.Empty;
+        SelectedColorFilter = "All";
+        IsLowStockFilterActive = false;
+    }
+    
+    [RelayCommand]
+    private void ToggleLowStockFilter()
+    {
+        IsLowStockFilterActive = !IsLowStockFilterActive;
+    }
+
+    [RelayCommand]
+    private async Task ShowFilters()
+    {
+        var filterSheet = new ClothFilterSheet(
+SearchText,
+            SelectedColorFilter,
+            IsLowStockFilterActive,
+            [.. AvailableColors]
+        );
+        
+        filterSheet.FiltersApplied += (s, e) =>
+        {
+            SearchText = e.SearchText;
+            SelectedColorFilter = e.SelectedColor;
+            IsLowStockFilterActive = e.IsLowStockOnly;
+        };
+        
+        await Shell.Current.Navigation.PushModalAsync(filterSheet);
     }
 
     [RelayCommand]
@@ -52,14 +195,16 @@ public partial class ClothInventoryViewModel(IDataService dataService, IAlert al
 
 public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataService, IAlert alertService, ClothInventoryViewModel parentViewModel) : ObservableObject
 {
-    public int Id => cloth.Id;
-    public string UniqueCode => cloth.UniqueCode;
-    public string Name => cloth.Name + " (" + cloth.UniqueCode + ")";
-    public string Color => cloth.Color;
-    public double PricePerMeter => cloth.PricePerMeter;
-    public double TotalMeters => cloth.TotalMeters;
-    public double RemainingMeters => cloth.RemainingMeters;
-    public DateTime AddedDate => cloth.AddedDate;
+    private Cloth _cloth = cloth;
+    
+    public int Id => _cloth.Id;
+    public string UniqueCode => _cloth.UniqueCode;
+    public string Name => _cloth.Name + " (" + _cloth.UniqueCode + ")";
+    public string Color => _cloth.Color;
+    public double PricePerMeter => _cloth.PricePerMeter;
+    public double TotalMeters => _cloth.TotalMeters;
+    public double RemainingMeters => _cloth.RemainingMeters;
+    public DateTime AddedDate => _cloth.AddedDate;
 
     public double UsedMeters => TotalMeters - RemainingMeters;
     public double TotalValue => RemainingMeters * PricePerMeter;
@@ -83,10 +228,18 @@ public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataS
     {
         try
         {
+            var viewModel = new AddClothViewModel(dataService, _cloth);
             var dialog = new AddClothDialog
             {
-                BindingContext = new AddClothViewModel(dataService, cloth)
+                BindingContext = viewModel
             };
+            
+            dialog.Disappearing += async (s, e) => 
+            {
+                await Task.Delay(100); // Ensure dialog is fully closed
+                await parentViewModel.RefreshSingleClothAsync(Id);
+            };
+            
             await Shell.Current.Navigation.PushModalAsync(dialog);
         }
         catch (Exception ex)
@@ -100,15 +253,26 @@ public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataS
     {
         var confirmed = await alertService.DisplayConfirmAlert(
             "Delete Cloth",
-            $"Are you sure you want to delete '{cloth.Name}'? This action cannot be undone.",
+            $"Are you sure you want to delete '{_cloth.Name}'? This action cannot be undone.",
             "Delete",
             "Cancel");
 
         if (confirmed)
         {
-            await dataService.DeleteClothAsync(Id);
-            await alertService.DisplayAlert("Success", "Cloth deleted successfully", "OK");
-            await parentViewModel.LoadDataAsync();
+            try
+            {
+                await dataService.DeleteClothAsync(Id);
+                await alertService.DisplayAlert("Success", "Cloth deleted successfully", "OK");
+                parentViewModel.RemoveCloth(Id);
+            }
+            catch (InvalidOperationException ex)
+            {
+                await alertService.DisplayAlert("Cannot Delete", ex.Message, "OK");
+            }
+            catch (Exception ex)
+            {
+                await alertService.DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
+            }
         }
     }
 

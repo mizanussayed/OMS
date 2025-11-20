@@ -7,11 +7,13 @@ public class PostgresDataService : IDataService, IDisposable
 {
     private readonly string _connectionString;
     private readonly NpgsqlDataSource? _dataSource;
+    private readonly ISettingsService _settingsService;
     private bool _disposed;
 
-    public PostgresDataService(string connectionString, bool useConnectionPooling = true)
+    public PostgresDataService(string connectionString, ISettingsService settingsService, bool useConnectionPooling = true)
     {
         _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         
         if (useConnectionPooling)
         {
@@ -80,14 +82,13 @@ public class PostgresDataService : IDataService, IDisposable
         await using var connection = await GetConnectionAsync();
 
         await using var command = new NpgsqlCommand(
-            @"INSERT INTO cloths (UNIQUE_CODE, NAME, COLOR, PRICE_PER_METER, TOTAL_METERS, 
+            @"INSERT INTO cloths (NAME, COLOR, PRICE_PER_METER, TOTAL_METERS, 
                                   REMAINING_METERS, ADDED_DATE)
-              VALUES (@uniqueCode, @name, @color, @pricePerMeter, @totalMeters, 
+              VALUES (@name, @color, @pricePerMeter, @totalMeters, 
                       @remainingMeters, @addedDate)
               RETURNING ID",
             connection);
 
-        command.Parameters.AddWithValue("@uniqueCode", cloth.UniqueCode);
         command.Parameters.AddWithValue("@name", cloth.Name);
         command.Parameters.AddWithValue("@color", cloth.Color);
         command.Parameters.AddWithValue("@pricePerMeter", (decimal)cloth.PricePerMeter);
@@ -97,6 +98,19 @@ public class PostgresDataService : IDataService, IDisposable
 
         var id = await command.ExecuteScalarAsync();
         cloth.Id = Convert.ToInt32(id);
+        
+        // Auto-generate UniqueCode using settings prefix
+        var prefix = await _settingsService.GetClothCodePrefixAsync();
+        cloth.UniqueCode = $"{prefix}-{cloth.Id}";
+        
+        // Update the record with the generated UniqueCode
+        await using var updateCommand = new NpgsqlCommand(
+            "UPDATE cloths SET UNIQUE_CODE = @uniqueCode WHERE ID = @id",
+            connection);
+        
+        updateCommand.Parameters.AddWithValue("@uniqueCode", cloth.UniqueCode);
+        updateCommand.Parameters.AddWithValue("@id", cloth.Id);
+        await updateCommand.ExecuteNonQueryAsync();
     }
 
     public async Task UpdateClothAsync(Cloth cloth)
@@ -133,6 +147,12 @@ public class PostgresDataService : IDataService, IDisposable
     public async Task DeleteClothAsync(int clothId)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+
+        // Check if cloth is used in any orders
+        if (await IsClothUsedInOrdersAsync(clothId))
+        {
+            throw new InvalidOperationException("Cannot delete cloth that is used in orders. Please delete the related orders first.");
+        }
 
         await using var connection = await GetConnectionAsync();
 
@@ -222,17 +242,16 @@ public class PostgresDataService : IDataService, IDisposable
         {
             // Insert the order
             await using var command = new NpgsqlCommand(
-                @"INSERT INTO dress_orders (UNIQUE_CODE, CUSTOMER_NAME, MOBILE_NUMBER, 
+                @"INSERT INTO dress_orders (CUSTOMER_NAME, MOBILE_NUMBER, 
                                            DRESS_TYPE, CLOTH_ID, METERS_USED, STATUS, 
                                            ASSIGNED_TO, ORDER_DATE)
-                  VALUES (@uniqueCode, @customerName, @mobileNumber, @dressType, 
+                  VALUES (@customerName, @mobileNumber, @dressType, 
                           @clothId, @metersUsed, @status::dress_order_status, 
                           @assignedTo, @orderDate)
                   RETURNING ID",
                 connection,
                 transaction);
 
-            command.Parameters.AddWithValue("@uniqueCode", order.UniqueCode);
             command.Parameters.AddWithValue("@customerName", order.CustomerName);
             command.Parameters.AddWithValue("@mobileNumber", order.MobileNumber);
             command.Parameters.AddWithValue("@dressType", order.DressType);
@@ -244,19 +263,33 @@ public class PostgresDataService : IDataService, IDisposable
 
             var id = await command.ExecuteScalarAsync();
             order.Id = Convert.ToInt32(id);
+            
+            // Auto-generate UniqueCode using settings prefix
+            var prefix = await _settingsService.GetOrderCodePrefixAsync();
+            order.UniqueCode = $"{prefix}-{order.Id}";
+            
+            // Update the record with the generated UniqueCode
+            await using var updateCommand = new NpgsqlCommand(
+                "UPDATE dress_orders SET UNIQUE_CODE = @uniqueCode WHERE ID = @id",
+                connection,
+                transaction);
+            
+            updateCommand.Parameters.AddWithValue("@uniqueCode", order.UniqueCode);
+            updateCommand.Parameters.AddWithValue("@id", order.Id);
+            await updateCommand.ExecuteNonQueryAsync();
 
             // Update cloth remaining meters
-            await using var updateCommand = new NpgsqlCommand(
+            await using var updateClothCommand = new NpgsqlCommand(
                 @"UPDATE cloths 
                   SET REMAINING_METERS = REMAINING_METERS - @metersUsed
                   WHERE ID = @clothId AND REMAINING_METERS >= @metersUsed",
                 connection,
                 transaction);
 
-            updateCommand.Parameters.AddWithValue("@clothId", order.ClothId);
-            updateCommand.Parameters.AddWithValue("@metersUsed", (decimal)order.MetersUsed);
+            updateClothCommand.Parameters.AddWithValue("@clothId", order.ClothId);
+            updateClothCommand.Parameters.AddWithValue("@metersUsed", (decimal)order.MetersUsed);
 
-            var rowsAffected = await updateCommand.ExecuteNonQueryAsync();
+            var rowsAffected = await updateClothCommand.ExecuteNonQueryAsync();
             if (rowsAffected == 0)
             {
                 throw new InvalidOperationException("Insufficient cloth remaining.");
@@ -611,6 +644,104 @@ public class PostgresDataService : IDataService, IDisposable
         }
 
         return orders;
+    }
+    
+    /// <summary>
+    /// Checks if a cloth is used in any orders
+    /// </summary>
+    public async Task<bool> IsClothUsedInOrdersAsync(int clothId)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        await using var connection = await GetConnectionAsync();
+
+        await using var command = new NpgsqlCommand(
+            "SELECT EXISTS(SELECT 1 FROM dress_orders WHERE CLOTH_ID = @clothId)",
+            connection);
+
+        command.Parameters.AddWithValue("@clothId", clothId);
+
+        var result = await command.ExecuteScalarAsync();
+        return Convert.ToBoolean(result);
+    }
+    
+    /// <summary>
+    /// Gets top N cloths with lowest stock (by percentage)
+    /// </summary>
+    public async Task<IReadOnlyList<Cloth>> GetLowStockClothsAsync(int count = 5)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var cloths = new List<Cloth>();
+
+        await using var connection = await GetConnectionAsync();
+
+        await using var command = new NpgsqlCommand(
+            @"SELECT ID, UNIQUE_CODE, NAME, COLOR, PRICE_PER_METER, TOTAL_METERS, 
+                     REMAINING_METERS, ADDED_DATE
+              FROM cloths 
+              WHERE TOTAL_METERS > 0
+              ORDER BY (REMAINING_METERS / TOTAL_METERS) ASC
+              LIMIT @count",
+            connection);
+
+        command.Parameters.AddWithValue("@count", count);
+
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            cloths.Add(new Cloth
+            {
+                Id = reader.GetInt32(0),
+                UniqueCode = reader.GetString(1),
+                Name = reader.GetString(2),
+                Color = reader.GetString(3),
+                PricePerMeter = (double)reader.GetDecimal(4),
+                TotalMeters = (double)reader.GetDecimal(5),
+                RemainingMeters = (double)reader.GetDecimal(6),
+                AddedDate = reader.GetDateTime(7)
+            });
+        }
+
+        return cloths;
+    }
+    
+    /// <summary>
+    /// Gets top N latest cloths
+    /// </summary>
+    public async Task<IReadOnlyList<Cloth>> GetLatestClothsAsync(int count = 5)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var cloths = new List<Cloth>();
+
+        await using var connection = await GetConnectionAsync();
+
+        await using var command = new NpgsqlCommand(
+            @"SELECT ID, UNIQUE_CODE, NAME, COLOR, PRICE_PER_METER, TOTAL_METERS, 
+                     REMAINING_METERS, ADDED_DATE
+              FROM cloths 
+              ORDER BY ADDED_DATE DESC
+              LIMIT @count",
+            connection);
+
+        command.Parameters.AddWithValue("@count", count);
+
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            cloths.Add(new Cloth
+            {
+                Id = reader.GetInt32(0),
+                UniqueCode = reader.GetString(1),
+                Name = reader.GetString(2),
+                Color = reader.GetString(3),
+                PricePerMeter = (double)reader.GetDecimal(4),
+                TotalMeters = (double)reader.GetDecimal(5),
+                RemainingMeters = (double)reader.GetDecimal(6),
+                AddedDate = reader.GetDateTime(7)
+            });
+        }
+
+        return cloths;
     }
 
     #endregion

@@ -14,15 +14,6 @@ public partial class ItemOptionsSheet : ContentPage
 
     private async void OnLoaded(object? sender, EventArgs e)
     {
-        // Add haptic feedback
-        try
-        {
-#if ANDROID || IOS
-            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-#endif
-        }
-        catch { }
-        
         if (Content is Grid grid && grid.Children.Count > 1 && grid.Children[1] is Border border)
         {
             border.TranslationY = 400;           
@@ -32,30 +23,16 @@ public partial class ItemOptionsSheet : ContentPage
 
     private async void OnEditTapped(object? sender, EventArgs e)
     {
-        try
-        {
-#if ANDROID || IOS
-            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-#endif
-        }
-        catch { }
-        
-        EditRequested?.Invoke(this, EventArgs.Empty);
         await CloseSheet();
+        await Task.Delay(100);
+        EditRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private async void OnDeleteTapped(object? sender, EventArgs e)
     {
-        try
-        {
-#if ANDROID || IOS
-            HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
-#endif
-        }
-        catch { }
-        
-        DeleteRequested?.Invoke(this, EventArgs.Empty);
         await CloseSheet();
+        await Task.Delay(100);
+        DeleteRequested?.Invoke(this, EventArgs.Empty);
     }
 
     private async void OnBackgroundTapped(object? sender, EventArgs e)
