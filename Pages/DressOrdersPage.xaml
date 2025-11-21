@@ -224,6 +224,30 @@
                                                    IsVisible="{Binding IsDelivered}"
                                                    Padding="12,8"/>
                                 </Grid>
+                                
+                                <!-- Tap Hint - Only for Pending Orders -->
+                                <Label Text="💡 Tap to edit or delete" 
+                                       FontSize="11"
+                                       FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
+                                       TextColor="{StaticResource Gray400}"
+                                       HorizontalOptions="Center"
+                                       Margin="0,4,0,0"
+                                       IsVisible="{Binding CanEditOrDelete}"/>
+                                
+                                <!-- Locked Message - For Completed/Delivered Orders -->
+                                <HorizontalStackLayout Spacing="6"
+                                                      HorizontalOptions="Center"
+                                                      Margin="0,4,0,0"
+                                                      IsVisible="{Binding CanEditOrDelete, Converter={StaticResource InvertedBoolConverter}}">
+                                    <Label Text="🔒"
+                                           FontSize="11"
+                                           FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
+                                           VerticalOptions="Center"/>
+                                    <Label Text="Order processed - cannot edit or delete" 
+                                           FontSize="11"
+                                           TextColor="{StaticResource Gray400}"
+                                           VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>

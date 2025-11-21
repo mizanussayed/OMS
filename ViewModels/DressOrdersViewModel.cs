@@ -219,12 +219,21 @@ public partial class DressOrderItemViewModel(DressOrder order,
     public bool IsPending => Status == DressOrderStatus.Pending;
     public bool IsCompleted => Status == DressOrderStatus.Completed;
     public bool IsDelivered => Status == DressOrderStatus.Delivered;
+    
+    // Can only edit or delete pending orders
+    public bool CanEditOrDelete => IsPending;
 
     public bool HasAssignedTo => AssignedTo > 0;
 
     [RelayCommand]
     private async Task Complete()
     {
+        if (!IsPending)
+        {
+            await alertService.DisplayAlert("Cannot Complete", "Only pending orders can be marked as completed.", "OK");
+            return;
+        }
+        
         await dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Completed);
         _status = DressOrderStatus.Completed;
         OnPropertyChanged(nameof(Status));
@@ -235,11 +244,18 @@ public partial class DressOrderItemViewModel(DressOrder order,
         OnPropertyChanged(nameof(IsPending));
         OnPropertyChanged(nameof(IsCompleted));
         OnPropertyChanged(nameof(IsDelivered));
+        OnPropertyChanged(nameof(CanEditOrDelete));
     }
 
     [RelayCommand]
     private async Task Deliver()
     {
+        if (!IsCompleted)
+        {
+            await alertService.DisplayAlert("Cannot Deliver", "Only completed orders can be marked as delivered.", "OK");
+            return;
+        }
+        
         await dataService.UpdateOrderStatusAsync(Id, DressOrderStatus.Delivered);
         _status = DressOrderStatus.Delivered;
         OnPropertyChanged(nameof(Status));
@@ -250,21 +266,49 @@ public partial class DressOrderItemViewModel(DressOrder order,
         OnPropertyChanged(nameof(IsPending));
         OnPropertyChanged(nameof(IsCompleted));
         OnPropertyChanged(nameof(IsDelivered));
+        OnPropertyChanged(nameof(CanEditOrDelete));
     }
 
     [RelayCommand]
     private async Task Edit()
     {
+        // Only allow editing pending orders
+        if (!IsPending)
+        {
+            await alertService.DisplayAlert(
+                "Cannot Edit", 
+                "Only pending orders can be edited. This order has already been processed.", 
+                "OK");
+            return;
+        }
+        
         var dialog = new NewOrderDialog
         {
             BindingContext = new NewOrderViewModel(dataService, alertService, order)
         };
+        
+        dialog.Disappearing += async (s, e) => 
+        {
+            await Task.Delay(100);
+            await parentViewModel.LoadDataAsync();
+        };
+        
         await Shell.Current.Navigation.PushModalAsync(dialog);
     }
 
     [RelayCommand]
     private async Task Delete()
     {
+        // Only allow deleting pending orders
+        if (!IsPending)
+        {
+            await alertService.DisplayAlert(
+                "Cannot Delete", 
+                "Only pending orders can be deleted. This order has already been processed.", 
+                "OK");
+            return;
+        }
+        
         var confirmed = await alertService.DisplayConfirmAlert(
             "Delete Order",
             $"Are you sure you want to delete order for '{order.CustomerName}'? This action cannot be undone.",
@@ -288,6 +332,19 @@ public partial class DressOrderItemViewModel(DressOrder order,
     [RelayCommand]
     private async Task ShowOptions()
     {
+        // Only show edit/delete options for pending orders
+        if (!IsPending)
+        {
+            await alertService.DisplayAlert(
+                "Order Processed", 
+                "This order has already been processed and cannot be edited or deleted.\n\n" +
+                $"Status: {StatusText}\n" +
+                $"Customer: {order.CustomerName}\n" +
+                $"Order Date: {OrderDate:MMM dd, yyyy}", 
+                "OK");
+            return;
+        }
+        
         var optionsSheet = new ItemOptionsSheet();
         
         optionsSheet.EditRequested += async (s, e) => await Edit();

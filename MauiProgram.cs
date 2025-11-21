@@ -8,6 +8,7 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
+        //var connectionString = "";
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
@@ -17,7 +18,6 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        var connectionString = "";
         // Services
         builder.Services.AddSingleton<ISettingsService, SettingsService>();
         builder.Services.AddSingleton<IDataService>(sp => 
@@ -26,8 +26,6 @@ public static class MauiProgram
             return new PostgresDataService(connectionString, settingsService);
         });
         builder.Services.AddSingleton<IAlert, AlertService>();
-
-        // ViewModels
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddTransient<ClothInventoryViewModel>();
@@ -38,7 +36,6 @@ public static class MauiProgram
         builder.Services.AddTransient<NewOrderViewModel>();
         builder.Services.AddTransient<AddMakerViewModel>();
 
-        // Pages
         builder.Services.AddTransient<LoginPage>();
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<ClothInventoryPage>();

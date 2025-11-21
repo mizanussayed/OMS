@@ -89,7 +89,7 @@ public class PostgresDataService : IDataService, IDisposable
               RETURNING ID",
             connection);
 
-        command.Parameters.AddWithValue("@uniqueCode", "");
+        command.Parameters.AddWithValue("@uniqueCode", "CLT_-999");
         command.Parameters.AddWithValue("@name", cloth.Name);
         command.Parameters.AddWithValue("@color", cloth.Color);
         command.Parameters.AddWithValue("@pricePerMeter", (decimal)cloth.PricePerMeter);
@@ -100,11 +100,10 @@ public class PostgresDataService : IDataService, IDisposable
         var id = await command.ExecuteScalarAsync();
         cloth.Id = Convert.ToInt32(id);
         
-        // Auto-generate UniqueCode using settings prefix
         var prefix = await _settingsService.GetClothCodePrefixAsync();
         cloth.UniqueCode = $"{prefix}-{cloth.Id}";
         
-        // Update the record with the generated UniqueCode
+
         await using var updateCommand = new NpgsqlCommand(
             "UPDATE cloths SET UNIQUE_CODE = @uniqueCode WHERE ID = @id",
             connection);
@@ -252,7 +251,7 @@ public class PostgresDataService : IDataService, IDisposable
                 connection,
                 transaction);
             
-            command.Parameters.AddWithValue("@uniqueCode", "");
+            command.Parameters.AddWithValue("@uniqueCode", "ORD_-999");
             command.Parameters.AddWithValue("@customerName", order.CustomerName);
             command.Parameters.AddWithValue("@mobileNumber", order.MobileNumber);
             command.Parameters.AddWithValue("@dressType", order.DressType);
@@ -265,11 +264,9 @@ public class PostgresDataService : IDataService, IDisposable
             var id = await command.ExecuteScalarAsync();
             order.Id = Convert.ToInt32(id);
             
-            // Auto-generate UniqueCode using settings prefix
             var prefix = await _settingsService.GetOrderCodePrefixAsync();
             order.UniqueCode = $"{prefix}-{order.Id}";
             
-            // Update the record with the generated UniqueCode
             await using var updateCommand = new NpgsqlCommand(
                 "UPDATE dress_orders SET UNIQUE_CODE = @uniqueCode WHERE ID = @id",
                 connection,
@@ -279,7 +276,6 @@ public class PostgresDataService : IDataService, IDisposable
             updateCommand.Parameters.AddWithValue("@id", order.Id);
             await updateCommand.ExecuteNonQueryAsync();
 
-            // Update cloth remaining meters
             await using var updateClothCommand = new NpgsqlCommand(
                 @"UPDATE cloths 
                   SET REMAINING_METERS = REMAINING_METERS - @metersUsed
@@ -458,36 +454,6 @@ public class PostgresDataService : IDataService, IDisposable
         }
     }
 
-    /// <summary>
-    /// Gets database statistics
-    /// </summary>
-    public async Task<(int TotalCloths, int TotalOrders, int PendingOrders, int TotalEmployees)> GetDatabaseStatsAsync()
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        await using var connection = await GetConnectionAsync();
-
-        await using var command = new NpgsqlCommand(
-            @"SELECT 
-                (SELECT COUNT(*) FROM cloths) as total_cloths,
-                (SELECT COUNT(*) FROM dress_orders) as total_orders,
-                (SELECT COUNT(*) FROM dress_orders WHERE STATUS = 'Pending') as pending_orders,
-                (SELECT COUNT(*) FROM employees) as total_employees",
-            connection);
-
-        await using var reader = await command.ExecuteReaderAsync();
-        if (await reader.ReadAsync())
-        {
-            return (
-                Convert.ToInt32(reader.GetInt64(0)),
-                Convert.ToInt32(reader.GetInt64(1)),
-                Convert.ToInt32(reader.GetInt64(2)),
-                Convert.ToInt32(reader.GetInt64(3))
-            );
-        }
-
-        return (0, 0, 0, 0);
-    }
 
     /// <summary>
     /// Gets cloth by ID
@@ -526,44 +492,6 @@ public class PostgresDataService : IDataService, IDisposable
         return null;
     }
 
-    /// <summary>
-    /// Gets order by ID
-    /// </summary>
-    public async Task<DressOrder?> GetOrderByIdAsync(int orderId)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        await using var connection = await GetConnectionAsync();
-
-        await using var command = new NpgsqlCommand(
-            @"SELECT ID, UNIQUE_CODE, CUSTOMER_NAME, MOBILE_NUMBER, DRESS_TYPE, 
-                     CLOTH_ID, METERS_USED, STATUS, ASSIGNED_TO, ORDER_DATE
-              FROM dress_orders 
-              WHERE ID = @id",
-            connection);
-
-        command.Parameters.AddWithValue("@id", orderId);
-
-        await using var reader = await command.ExecuteReaderAsync();
-        if (await reader.ReadAsync())
-        {
-            return new DressOrder
-            {
-                Id = reader.GetInt32(0),
-                UniqueCode = reader.GetString(1),
-                CustomerName = reader.GetString(2),
-                MobileNumber = reader.GetString(3),
-                DressType = reader.GetString(4),
-                ClothId = reader.GetInt32(5),
-                MetersUsed = (double)reader.GetDecimal(6),
-                Status = Enum.Parse<DressOrderStatus>(reader.GetString(7)),
-                AssignedTo = reader.GetInt32(8),
-                OrderDate = reader.GetDateTime(9)
-            };
-        }
-
-        return null;
-    }
 
     /// <summary>
     /// Gets orders by status

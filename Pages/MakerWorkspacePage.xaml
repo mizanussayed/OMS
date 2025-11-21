@@ -9,16 +9,15 @@
     NavigationPage.HasNavigationBar="False"
     Title="My Orders"
     BackgroundColor="{StaticResource Gray50}">
-    
+
     <Grid RowDefinitions="Auto,*">
         <components:GradientHeader Grid.Row="0"
-                                  Title="My Workspace"
-                                  Subtitle="{Binding MakerName}"
-                                  TitleAlignment="Center"
-                                  ActionButtonText="Logout"
-                                  ActionButtonFontSize="12"
-                                  ShowActionButton="True"
-                                  ActionButtonCommand="{Binding LogoutCommand}"/>
+                                   Title="{Binding MakerName}"
+                                   Subtitle="My Workspace"
+                                   ActionButtonIcon="icon_logout.svg"
+                                   ActionButtonText="Logout"
+                                   ShowActionButton="True"
+                                   ActionButtonCommand="{Binding LogoutCommand}"/>
 
         <!-- Content -->
         <ScrollView Grid.Row="1">
@@ -37,40 +36,77 @@
                                 Radius="8"
                                 Offset="0,2" />
                     </Border.Shadow>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Assigned Orders" 
-                                   FontSize="12"
+                            <Label Text="Total Orders" 
+                                   FontSize="11"
                                    TextColor="{StaticResource Gray600}"/>
                             <Label Text="{Binding TotalOrders}" 
-                                   FontSize="24"
+                                   FontSize="20"
                                    FontAttributes="Bold"
                                    TextColor="{StaticResource Purple600}"/>
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" Spacing="4">
                             <Label Text="Pending" 
-                                   FontSize="12"
+                                   FontSize="11"
                                    TextColor="{StaticResource Gray600}"/>
                             <Label Text="{Binding PendingOrders}" 
-                                   FontSize="24"
+                                   FontSize="20"
                                    FontAttributes="Bold"
                                    TextColor="{StaticResource Yellow600}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="4">
+                            <Label Text="Completed" 
+                                   FontSize="11"
+                                   TextColor="{StaticResource Gray600}"/>
+                            <Label Text="{Binding CompletedOrders}" 
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Blue600}"/>
                         </VerticalStackLayout>
                     </Grid>
                 </Border>
 
-                <!-- Orders List -->
-                <Label Text="Your Orders" 
-                       FontSize="18"
-                       FontAttributes="Bold" 
-                       TextColor="{StaticResource Gray900}"/>
-
-                <!-- Empty State -->
-                <components:EmptyState Icon="&#x1F4CB;"
-                                      Title="No Orders Assigned"
-                                      Message="You don't have any orders assigned yet. Please contact your admin."
-                                      IsVisible="{Binding HasNoOrders}"/>
-
+                <!-- Filter Section -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Grid.Column="0"
+                            Padding="1"
+                            BackgroundColor="{StaticResource Gray50}"
+                            StrokeThickness="1"
+                            Stroke="{StaticResource Gray200}"
+                            >
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8" />
+                        </Border.StrokeShape>
+                        <Picker ItemsSource="{Binding AvailableStatuses}"
+                                SelectedItem="{Binding SelectedStatusFilterString}"
+                                Title="Filter"
+                                FontSize="13"
+                                TextColor="{StaticResource Gray900}"
+                                TitleColor="{StaticResource Gray600}"
+                                BackgroundColor="Transparent"
+                                WidthRequest="90"/>
+                    </Border>
+                    <Button Text="Clear Filter"
+                        Grid.Column="1"
+                        Command="{Binding ClearFiltersCommand}"
+                        BackgroundColor="{StaticResource Gray100}"
+                        TextColor="{StaticResource Gray700}"
+                        BorderColor="{StaticResource Gray300}"
+                        BorderWidth="1"
+                        CornerRadius="8"
+                        HeightRequest="36"
+                        FontSize="13"
+                        IsVisible="{Binding SelectedStatusFilterString, Converter={StaticResource StringIsNotNullOrEmptyConverter}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button"
+                                    Binding="{Binding SelectedStatusFilterString}"
+                                    Value="All">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
                 <!-- Orders Collection -->
                 <CollectionView ItemsSource="{Binding Orders}">
                     <CollectionView.ItemTemplate>
@@ -197,6 +233,13 @@
                             </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <Label Text="No order found!" 
+                               FontSize="16"
+                               TextColor="{StaticResource Gray600}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                    </CollectionView.EmptyView>
                 </CollectionView>
             </VerticalStackLayout>
         </ScrollView>

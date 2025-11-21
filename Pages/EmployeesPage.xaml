@@ -9,8 +9,8 @@
     Title="Employees"
     BackgroundColor="{StaticResource Gray50}"
     Shell.NavBarIsVisible="False">
-
-	<Grid RowDefinitions="Auto,*">
+    
+    <Grid RowDefinitions="Auto,*">
 		<components:GradientHeader Grid.Row="0"
                 Title="Employees"
                 Subtitle="Manage your team members"
