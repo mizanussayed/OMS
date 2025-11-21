@@ -16,8 +16,6 @@ public partial class DashboardPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        SetStatusBarColor();
-
         try
         {
             await _viewModel.LoadDataCommand.ExecuteAsync(null);
@@ -25,17 +23,5 @@ public partial class DashboardPage : ContentPage
         catch 
         {
         }
-    }
-
-    private static void SetStatusBarColor()
-    {
-            if (Platform.CurrentActivity?.Window != null)
-            {
-                var window = Platform.CurrentActivity.Window;
-#pragma warning disable CA1422
-                window.SetStatusBarColor(Android.Graphics.Color.ParseColor("#9333ea"));
-                window.SetNavigationBarColor(Android.Graphics.Color.ParseColor("#ffffff"));
-#pragma warning restore CA1422
-            }
     }
 }

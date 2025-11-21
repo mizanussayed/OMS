@@ -149,7 +149,6 @@ public class PostgresDataService : IDataService, IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        // Check if cloth is used in any orders
         if (await IsClothUsedInOrdersAsync(clothId))
         {
             throw new InvalidOperationException("Cannot delete cloth that is used in orders. Please delete the related orders first.");
