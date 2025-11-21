@@ -4,9 +4,8 @@ namespace OMS.Pages;
 
 public partial class AddMakerDialog : ContentPage
 {
-    public AddMakerDialog(AddMakerViewModel viewModel)
+    public AddMakerDialog()
     {
         InitializeComponent();
-        BindingContext = viewModel;
     }
 }

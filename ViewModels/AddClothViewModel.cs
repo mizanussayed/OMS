@@ -80,12 +80,11 @@ public partial class AddClothViewModel : ObservableObject
         _dataService = dataService;
         _existingCloth = cloth;
         _isEditMode = true;
-        _isInitializing = true; // Prevent UpdatePreview from running during initialization
+        _isInitializing = true; 
 
         PageTitle = "Edit Cloth";
         SubmitButtonText = "Update Cloth";
         
-        // Show UniqueCode in edit mode (read-only)
         UniqueCode = cloth.UniqueCode;
         IsUniqueCodeVisible = true;
 
@@ -94,85 +93,7 @@ public partial class AddClothViewModel : ObservableObject
         color = cloth.Color;
         pricePerMeter = cloth.PricePerMeter.ToString();
         totalMeters = cloth.TotalMeters.ToString();
-
         _isInitializing = false;
-        
-        // Now update preview once
-        UpdatePreview();
-    }
-
-    partial void OnNameChanged(string value)
-    {
-        if (_isInitializing) return;
-        NameError = string.Empty;
-        UpdatePreview();
-    }
-
-    partial void OnColorChanged(string value)
-    {
-        if (_isInitializing) return;
-        ColorError = string.Empty;
-        UpdatePreview();
-    }
-
-    partial void OnPricePerMeterChanged(string value)
-    {
-        if (_isInitializing) return;
-        PriceError = string.Empty;
-        UpdatePreview();
-    }
-
-    partial void OnTotalMetersChanged(string value)
-    {
-        if (_isInitializing) return;
-        MetersError = string.Empty;
-        UpdatePreview();
-    }
-
-    private void UpdatePreview()
-    {
-        HasPreview = !string.IsNullOrWhiteSpace(Name) || 
-                     !string.IsNullOrWhiteSpace(Color) || 
-                     !string.IsNullOrWhiteSpace(PricePerMeter) || 
-                     !string.IsNullOrWhiteSpace(TotalMeters);
-
-        if (!HasPreview) return;
-
-        PreviewText = $"{Name} - {Color}";
-        PreviewColor = GetColorFromName(Color);
-        PreviewPrice = PricePerMeter;
-        PreviewMeters = TotalMeters;
-
-        if (double.TryParse(PricePerMeter, out var price) && 
-            double.TryParse(TotalMeters, out var meters))
-        {
-            PreviewValue = (price * meters).ToString("N0");
-        }
-        else
-        {
-            PreviewValue = "0";
-        }
-    }
-
-    private static Color GetColorFromName(string colorName)
-    {
-        if (string.IsNullOrWhiteSpace(colorName)) return Colors.Gray;
-
-        return colorName.ToLower() switch
-        {
-            "red" => Colors.Red,
-            "blue" => Colors.Blue,
-            "green" => Colors.Green,
-            "yellow" => Colors.Yellow,
-            "orange" => Colors.Orange,
-            "purple" => Colors.Purple,
-            "pink" => Colors.Pink,
-            "brown" => Colors.Brown,
-            "black" => Colors.Black,
-            "white" => Colors.White,
-            "gray" or "grey" => Colors.Gray,
-            _ => Colors.Gray
-        };
     }
 
     [RelayCommand]

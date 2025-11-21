@@ -147,6 +147,13 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
         
         await Shell.Current.Navigation.PushModalAsync(dialog);
     }
+
+    [RelayCommand]
+    private async Task Print()
+    {
+        // Implementation for printing cloth inventory report
+        await alertService.DisplayAlert("Print", "Print functionality is not implemented yet.", "OK");
+    }
 }
 
 public partial class DressOrderItemViewModel(DressOrder order, 

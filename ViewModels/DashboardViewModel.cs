@@ -76,7 +76,6 @@ public partial class DashboardViewModel(IDataService dataService, IAlert alertSe
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Dashboard LoadDataAsync error: {ex.Message}");
-            System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             
             // Initialize with empty data on error
             TotalCloths = 0;
@@ -101,13 +100,6 @@ public partial class DashboardViewModel(IDataService dataService, IAlert alertSe
 
         return Task.CompletedTask;
     }
-
-    
-    [RelayCommand]
-    private async Task ViewEmployees()
-    {
-        await Shell.Current.GoToAsync("//EmployeesPage");
-    }
     
     [RelayCommand]
     private async Task OpenSettings()
@@ -130,7 +122,6 @@ public partial class DashboardViewModel(IDataService dataService, IAlert alertSe
 public class ClothViewModel(Cloth cloth) : ObservableObject
 {
     private readonly Cloth _cloth = cloth ?? throw new ArgumentNullException(nameof(cloth));
-
     public string Id => _cloth.Id.ToString();
     public string Name => _cloth!.Name;
     public string UniqueCode => _cloth.UniqueCode;

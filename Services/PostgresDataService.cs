@@ -82,13 +82,14 @@ public class PostgresDataService : IDataService, IDisposable
         await using var connection = await GetConnectionAsync();
 
         await using var command = new NpgsqlCommand(
-            @"INSERT INTO cloths (NAME, COLOR, PRICE_PER_METER, TOTAL_METERS, 
+            @"INSERT INTO cloths (UNIQUE_CODE, NAME, COLOR, PRICE_PER_METER, TOTAL_METERS, 
                                   REMAINING_METERS, ADDED_DATE)
-              VALUES (@name, @color, @pricePerMeter, @totalMeters, 
+              VALUES (@uniqueCode, @name, @color, @pricePerMeter, @totalMeters, 
                       @remainingMeters, @addedDate)
               RETURNING ID",
             connection);
 
+        command.Parameters.AddWithValue("@uniqueCode", "");
         command.Parameters.AddWithValue("@name", cloth.Name);
         command.Parameters.AddWithValue("@color", cloth.Color);
         command.Parameters.AddWithValue("@pricePerMeter", (decimal)cloth.PricePerMeter);
@@ -242,16 +243,17 @@ public class PostgresDataService : IDataService, IDisposable
         {
             // Insert the order
             await using var command = new NpgsqlCommand(
-                @"INSERT INTO dress_orders (CUSTOMER_NAME, MOBILE_NUMBER, 
+                @"INSERT INTO dress_orders (UNIQUE_CODE, CUSTOMER_NAME, MOBILE_NUMBER, 
                                            DRESS_TYPE, CLOTH_ID, METERS_USED, STATUS, 
                                            ASSIGNED_TO, ORDER_DATE)
-                  VALUES (@customerName, @mobileNumber, @dressType, 
+                  VALUES (@uniqueCode, @customerName, @mobileNumber, @dressType, 
                           @clothId, @metersUsed, @status::dress_order_status, 
                           @assignedTo, @orderDate)
                   RETURNING ID",
                 connection,
                 transaction);
-
+            
+            command.Parameters.AddWithValue("@uniqueCode", "");
             command.Parameters.AddWithValue("@customerName", order.CustomerName);
             command.Parameters.AddWithValue("@mobileNumber", order.MobileNumber);
             command.Parameters.AddWithValue("@dressType", order.DressType);

@@ -160,7 +160,7 @@ public partial class ClothInventoryViewModel(IDataService dataService, IAlert al
     private async Task ShowFilters()
     {
         var filterSheet = new ClothFilterSheet(
-SearchText,
+            SearchText,
             SelectedColorFilter,
             IsLowStockFilterActive,
             [.. AvailableColors]
@@ -190,6 +190,13 @@ SearchText,
         };
         
         await Shell.Current.Navigation.PushModalAsync(dialog);
+    }
+
+    [RelayCommand]
+    private async Task Print()
+    {
+        // Implementation for printing cloth inventory report
+        await alertService.DisplayAlert("Print", "Print functionality is not implemented yet.", "OK");
     }
 }
 
@@ -242,9 +249,9 @@ public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataS
             
             await Shell.Current.Navigation.PushModalAsync(dialog);
         }
-        catch (Exception ex)
+        catch
         {
-            await alertService.DisplayAlert("Error", $"An error occurred while trying to edit the cloth: {ex.Message}", "OK");
+            await alertService.DisplayAlert("Error", "An error occurred while trying to edit the cloth", "OK");
         }
     }
 
@@ -265,13 +272,9 @@ public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataS
                 await alertService.DisplayAlert("Success", "Cloth deleted successfully", "OK");
                 parentViewModel.RemoveCloth(Id);
             }
-            catch (InvalidOperationException ex)
+            catch
             {
-                await alertService.DisplayAlert("Cannot Delete", ex.Message, "OK");
-            }
-            catch (Exception ex)
-            {
-                await alertService.DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
+                await alertService.DisplayAlert("Cannot Delete", "Cloth can not deleted", "OK");
             }
         }
     }

@@ -104,23 +104,6 @@ public partial class SettingsViewModel : ObservableObject
     }
     
     [RelayCommand]
-    private async Task ResetToDefaults()
-    {
-        var confirmed = await _alertService.DisplayConfirmAlert(
-            "Reset Settings",
-            "Are you sure you want to reset to default prefixes (CLT and ORD)?",
-            "Reset",
-            "Cancel");
-        
-        if (confirmed)
-        {
-            ClothPrefix = "CLT";
-            OrderPrefix = "ORD";
-            await SaveSettings();
-        }
-    }
-    
-    [RelayCommand]
     private async Task Close()
     {
         await Shell.Current.Navigation.PopModalAsync();

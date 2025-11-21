@@ -146,7 +146,7 @@
                        Margin="0,8,0,0"/>
 
                 <!-- Cloth Inventory List -->
-                <CollectionView ItemsSource="{Binding Cloths}">
+                <CollectionView ItemsSource="{Binding LowStockCloths}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="vm:ClothViewModel">
                             <Border Padding="16" 
@@ -266,11 +266,6 @@
                                    FontSize="13"
                                    TextColor="{StaticResource Gray600}"/>
                         </VerticalStackLayout>
-                        <Label Text="›"
-                               FontSize="24"
-                               TextColor="{StaticResource Gray400}"
-                               HorizontalOptions="End"
-                               VerticalOptions="Center"/>
                     </HorizontalStackLayout>
                 </Border>
             </VerticalStackLayout>

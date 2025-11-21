@@ -18,16 +18,8 @@ public partial class OrderFilterSheet : ContentPage
 
     private async void OnLoaded(object? sender, EventArgs e)
     {
-        try
-        {
-#if ANDROID || IOS
-            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-#endif
-        }
-        catch { }
-        
         FilterSheet.TranslationY = 600;           
-        await FilterSheet.TranslateTo(0, 0, 250, Easing.CubicOut);
+        await FilterSheet.TranslateToAsync(0, 0, 250, Easing.CubicOut);
     }
 
     private async void OnApplyClicked(object? sender, EventArgs e)
@@ -60,7 +52,7 @@ public partial class OrderFilterSheet : ContentPage
 
     private async Task CloseSheet()
     {
-        await FilterSheet.TranslateTo(0, 600, 200, Easing.CubicIn);
+        await FilterSheet.TranslateToAsync(0, 600, 200, Easing.CubicIn);
         await Shell.Current.Navigation.PopModalAsync(false);
     }
 }

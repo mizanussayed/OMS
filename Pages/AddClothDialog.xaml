@@ -19,7 +19,7 @@
                 StrokeThickness="0"
                 VerticalOptions="End"
                 HorizontalOptions="Fill"
-                MaximumHeightRequest="600">
+                MaximumHeightRequest="580">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer />
             </Border.GestureRecognizers>

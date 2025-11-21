@@ -10,7 +10,7 @@
     BackgroundColor="{StaticResource Gray50}"
     Shell.NavBarIsVisible="False">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,Auto,*">
         <components:GradientHeader Grid.Row="0"
              Title="Cloth Inventory"
              Subtitle="Manage your fabric stock"
@@ -18,204 +18,168 @@
              ActionButtonText="Add Cloth"
              ShowActionButton="True"
              ActionButtonCommand="{Binding ShowAddClothCommand}"/>
-
-        <Grid Grid.Row="1" 
-              ColumnDefinitions="*,*"
-              ColumnSpacing="10">
-           
-            <Border Grid.Column="0"
-                    Padding="16"
-                    BackgroundColor="{StaticResource White}"
-                    StrokeThickness="0"
-                    VerticalOptions="Start">
-                <Border.Shadow>
-                    <Shadow Brush="{StaticResource Gray900}"
-                            Opacity="0.05"
-                            Radius="4"
-                            Offset="0,2" />
-                </Border.Shadow>
-                <Button Text="🔍 Filters"
-                        FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
-                        Command="{Binding ShowFiltersCommand}"
-                        BackgroundColor="{StaticResource Gray50}"
-                        TextColor="{StaticResource Gray900}"
-                        BorderColor="{StaticResource Gray200}"
-                        BorderWidth="1"
-                        CornerRadius="8"
-                        HeightRequest="44"/>
-            </Border>
         
-            <Border Grid.Column="1"
-                    Padding="16"
-                    BackgroundColor="{StaticResource White}"
-                    StrokeThickness="0"
-                    VerticalOptions="Start">
-                <Border.Shadow>
-                    <Shadow Brush="{StaticResource Gray900}"
-                            Opacity="0.05"
-                            Radius="4"
-                            Offset="0,2" />
-                </Border.Shadow>
-                <Button Text=" Print"
-                        FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
-                        Command="{Binding ShowFiltersCommand}"
-                        BackgroundColor="{StaticResource Gray50}"
-                        TextColor="{StaticResource Gray900}"
-                        BorderColor="{StaticResource Gray200}"
-                        BorderWidth="1"
-                        CornerRadius="8"
-                        HeightRequest="44"/>
-            </Border>
+        <Grid ColumnDefinitions="*,Auto,Auto" Padding="5" ColumnSpacing="10" Grid.Row="1">
+            <Button Grid.Column="1"
+                    Text="Filters"
+                    ImageSource="icon_filter.svg"
+                    ContentLayout="Left,12"
+                    Command="{Binding ShowFiltersCommand}"
+                    BackgroundColor="{StaticResource Gray50}"
+                    TextColor="{StaticResource Gray900}"
+                    BorderColor="{StaticResource Gray200}"
+                    BorderWidth="1"
+                    CornerRadius="8"
+                    HeightRequest="20"/>
+
+            <Button Grid.Column="2"
+                    Text="Print"
+                    ImageSource="icon_print.svg"
+                    ContentLayout="Left,12"
+                    Command="{Binding PrintCommand}"
+                    BackgroundColor="{StaticResource Gray50}"
+                    TextColor="{StaticResource Gray900}"
+                    BorderColor="{StaticResource Gray200}"
+                    BorderWidth="1"
+                    CornerRadius="8"
+                    HeightRequest="20"/>
         </Grid>
         <!-- Content -->
-        <RefreshView Grid.Row="1"
-                     Margin="0,76,0,0"
+        <RefreshView Grid.Row="2"
+                     Margin="0"
                      IsRefreshing="{Binding IsRefreshing}"
                      Command="{Binding LoadDataCommand}">
-            <ScrollView>
-                <VerticalStackLayout Padding="16" Spacing="12">
-                    <CollectionView ItemsSource="{Binding Cloths}">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="vm:ClothInventoryItemViewModel">
-                                <Border 
+
+            <CollectionView ItemsSource="{Binding Cloths}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ClothInventoryItemViewModel">
+                        <Border 
                                 Padding="16"
                                 StrokeThickness="0"
                                 BackgroundColor="{StaticResource White}"
                                 Margin="0,0,0,12"
                                 x:Name="ClothCard">
 
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="12" />
-                                    </Border.StrokeShape>
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
 
-                                    <Border.Shadow>
-                                        <Shadow 
+                            <Border.Shadow>
+                                <Shadow 
                                         Brush="{StaticResource Gray900}"
                                         Opacity="0.08"
                                         Radius="10"
                                         Offset="0,2" />
-                                    </Border.Shadow>
+                            </Border.Shadow>
 
-                                    <VerticalStackLayout Spacing="10">
-                                        <VerticalStackLayout.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding ShowOptionsCommand}" />
-                                        </VerticalStackLayout.GestureRecognizers>
+                            <VerticalStackLayout Spacing="10">
+                                <VerticalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ShowOptionsCommand}" />
+                                </VerticalStackLayout.GestureRecognizers>
 
-                                        <!-- Header with Name and Price -->
-                                        <Grid ColumnDefinitions="*,Auto" RowSpacing="4">
-                                            <Label Grid.Column="0"
+                                <!-- Header with Name and Price -->
+                                <Grid ColumnDefinitions="*,Auto" RowSpacing="4">
+                                    <Label Grid.Column="0"
                                                Text="{Binding Name}"
                                                FontSize="16"
                                                FontAttributes="Bold"
                                                TextColor="{StaticResource Gray900}"/>
-                                            <Label Grid.Column="1"
+                                    <Label Grid.Column="1"
                                                Text="{Binding PricePerMeter, StringFormat='৳{0}/m'}" 
                                                FontSize="16"
                                                FontAttributes="Bold"
                                                TextColor="{StaticResource Gray900}"
                                                HorizontalOptions="End"/>
-                                        </Grid>
+                                </Grid>
 
-                                        <!-- Color with Total Value -->
-                                        <Grid ColumnDefinitions="*,Auto">
-                                            <HorizontalStackLayout Grid.Column="0" Spacing="6">
-                                                <Ellipse WidthRequest="12" 
+                                <!-- Color with Total Value -->
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <HorizontalStackLayout Grid.Column="0" Spacing="6">
+                                        <Ellipse WidthRequest="12" 
                                                     HeightRequest="12"
                                                     Fill="{Binding Color, Converter={StaticResource ColorConverter}}"
                                                     VerticalOptions="Center"/>
-                                                <Label Text="{Binding Color}" 
+                                        <Label Text="{Binding Color}" 
                                                    FontSize="14"
                                                    TextColor="{StaticResource Gray600}"
                                                    VerticalOptions="Center"/>
-                                            </HorizontalStackLayout>
-                                            <Label Grid.Column="1"
+                                    </HorizontalStackLayout>
+                                    <Label Grid.Column="1"
                                                Text="{Binding TotalValue, StringFormat='Total:৳{0:N0}'}" 
                                                FontSize="12"
                                                TextColor="{StaticResource Gray500}"
                                                HorizontalOptions="End"
                                                VerticalOptions="Center"/>
-                                        </Grid>
+                                </Grid>
 
-                                        <!-- Available Stock -->
-                                        <Label FontSize="13"
+                                <!-- Available Stock -->
+                                <Label FontSize="13"
                                            TextColor="{StaticResource Gray600}">
-                                            <Label.FormattedText>
-                                                <FormattedString>
-                                                    <Span Text="Available: "/>
-                                                    <Span Text="{Binding RemainingMeters, StringFormat='{0}m'}"/>
-                                                    <Span Text=" of "/>
-                                                    <Span Text="{Binding TotalMeters, StringFormat='{0}m'}"/>
-                                                </FormattedString>
-                                            </Label.FormattedText>
-                                        </Label>
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Available: "/>
+                                            <Span Text="{Binding RemainingMeters, StringFormat='{0}m'}"/>
+                                            <Span Text=" of "/>
+                                            <Span Text="{Binding TotalMeters, StringFormat='{0}m'}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
 
 
-                                        <!-- Used and Added Info -->
-                                        <Grid ColumnDefinitions="*,*" ColumnSpacing="16" Margin="0,4,0,0">
-                                            <VerticalStackLayout Grid.Column="0" Spacing="2" 
+                                <!-- Used and Added Info -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="16" Margin="0,4,0,0">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2" 
                                                                  HorizontalOptions="Start">
-                                                <Label Text="Used" 
+                                        <Label Text="Used" 
                                                    FontSize="11" 
                                                    TextColor="{StaticResource Gray500}"/>
-                                                <Label Text="{Binding UsedMeters, StringFormat='{0}m'}" 
+                                        <Label Text="{Binding UsedMeters, StringFormat='{0}m'}" 
                                                    FontSize="13"
                                                    TextColor="{StaticResource Gray900}"/>
-                                            </VerticalStackLayout>
-                                            <VerticalStackLayout Grid.Column="1" Spacing="2"
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2"
                                                                  HorizontalOptions="End">
-                                                <Label Text="Added" 
+                                        <Label Text="Added" 
                                                    FontSize="11" 
                                                    TextColor="{StaticResource Gray500}"/>
-                                                <Label Text="{Binding AddedDate, StringFormat='{0:MM/dd/yyyy}'}" 
+                                        <Label Text="{Binding AddedDate, StringFormat='{0:MM/dd/yyyy}'}" 
                                                    FontSize="13"
                                                    TextColor="{StaticResource Gray900}"/>
-                                            </VerticalStackLayout>
-                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Grid>
 
-                                        <!-- Progress Bar -->
-                                        <Border HeightRequest="6"
+                                <!-- Progress Bar -->
+                                <Border HeightRequest="6"
                                             BackgroundColor="{StaticResource Gray200}"
                                             StrokeThickness="0">
-                                            <Border.StrokeShape>
-                                                <RoundRectangle CornerRadius="3" />
-                                            </Border.StrokeShape>
-                                            <Border WidthRequest="{Binding ProgressWidth}"
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="3" />
+                                    </Border.StrokeShape>
+                                    <Border WidthRequest="{Binding ProgressWidth}"
                                                 HeightRequest="6"
                                                 BackgroundColor="{Binding ProgressColor}"
                                                 HorizontalOptions="Start"
                                                 StrokeThickness="0">
-                                                <Border.StrokeShape>
-                                                    <RoundRectangle CornerRadius="3" />
-                                                </Border.StrokeShape>
-                                            </Border>
-                                        </Border>
-                                    </VerticalStackLayout>
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="3" />
+                                        </Border.StrokeShape>
+                                    </Border>
                                 </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                    <Border Padding="32" 
-                        StrokeThickness="1"
-                        Stroke="{StaticResource Gray100}"
-                        BackgroundColor="{StaticResource White}"
-                        IsVisible="{Binding HasNoCloth}">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="12" />
-                        </Border.StrokeShape>
-                        <Border.Shadow>
-                            <Shadow Brush="{StaticResource Gray900}"
-                                Opacity="0.1"
-                                Radius="8"
-                                Offset="0,2" />
-                        </Border.Shadow>
-                        <Label Text="No cloth yet. Create your first cloth!" 
-                               FontSize="16"
-                               TextColor="{StaticResource Gray500}"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"/>
-                    </Border>
-                </VerticalStackLayout>
-            </ScrollView>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyViewTemplate>
+                    <DataTemplate>
+                        <Label IsVisible="{Binding HasNoCloth}"
+                                   Text="No cloth yet. Create cloth first!" 
+                                   FontSize="16"
+                                   TextColor="{StaticResource Gray500}"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"/>
+                    </DataTemplate>
+                </CollectionView.EmptyViewTemplate>
+            </CollectionView>
         </RefreshView>
     </Grid>
 </ContentPage>

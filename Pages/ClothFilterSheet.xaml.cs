@@ -4,7 +4,7 @@ public partial class ClothFilterSheet : ContentPage
 {
     public event EventHandler<ClothFilterEventArgs>? FiltersApplied;
     
-    public List<string> AvailableColors { get; set; } = new();
+    public List<string> AvailableColors { get; set; } = [];
     
     public ClothFilterSheet(string currentSearch, string currentColor, bool currentLowStock, List<string> colors)
     {
@@ -22,16 +22,9 @@ public partial class ClothFilterSheet : ContentPage
 
     private async void OnLoaded(object? sender, EventArgs e)
     {
-        try
-        {
-#if ANDROID || IOS
-            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-#endif
-        }
-        catch { }
         
         FilterSheet.TranslationY = 600;           
-        await FilterSheet.TranslateTo(0, 0, 250, Easing.CubicOut);
+        await FilterSheet.TranslateToAsync(0, 0, 250, Easing.CubicOut);
     }
 
     private async void OnApplyClicked(object? sender, EventArgs e)
@@ -57,6 +50,7 @@ public partial class ClothFilterSheet : ContentPage
     private async void OnCancelClicked(object? sender, EventArgs e)
     {
         await CloseSheet();
+
     }
 
     private async void OnBackgroundTapped(object? sender, EventArgs e)
@@ -66,7 +60,7 @@ public partial class ClothFilterSheet : ContentPage
 
     private async Task CloseSheet()
     {
-        await FilterSheet.TranslateTo(0, 600, 200, Easing.CubicIn);
+        await FilterSheet.TranslateToAsync(0, 600, 200, Easing.CubicIn);
         await Shell.Current.Navigation.PopModalAsync(false);
     }
 }

@@ -26,7 +26,7 @@ public partial class EmployeesViewModel(IDataService dataService, IAlert alertSe
         try
         {
             var employeesList = await dataService.GetEmployeesAsync();
-            var employeeViewModels = employeesList.Select(e => new EmployeeItemViewModel(e, dataService, alertService, this)).ToList();
+            var employeeViewModels = employeesList.Select(e => new EmployeeItemViewModel(e)).ToList();
             Employees = new ObservableCollection<EmployeeItemViewModel>(employeeViewModels);
             HasNoEmployees = !Employees.Any();
         }
@@ -44,7 +44,10 @@ public partial class EmployeesViewModel(IDataService dataService, IAlert alertSe
     private async Task ShowAddEmployee()
     {
         var viewModel = new AddMakerViewModel(dataService, alertService);
-        var dialog = new AddMakerDialog(viewModel);
+        var dialog = new AddMakerDialog
+        {
+            BindingContext = viewModel
+        };
         
         dialog.Disappearing += async (s, e) => 
         {
@@ -55,9 +58,9 @@ public partial class EmployeesViewModel(IDataService dataService, IAlert alertSe
     }
 }
 
-public partial class EmployeeItemViewModel(Employee employee, IDataService dataService, IAlert alertService, EmployeesViewModel parentViewModel) : ObservableObject
+public partial class EmployeeItemViewModel(Employee employee) : ObservableObject
 {
-    private Employee _employee = employee;
+    private readonly Employee _employee = employee;
     
     public int Id => _employee.Id;
     public string Name => _employee.Name;
@@ -73,18 +76,8 @@ public partial class EmployeeItemViewModel(Employee employee, IDataService dataS
         if (parts.Length == 0) return "?";
         
         if (parts.Length == 1)
-            return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+            return parts[0][..Math.Min(2, parts[0].Length)].ToUpper();
         
         return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpper();
-    }
-    
-    
-    [RelayCommand]
-    private async Task ShowDetails()
-    {
-        await alertService.DisplayAlert(
-            "Employee Details",
-            $"Name: {Name}\nUsername: {Username}\nMobile: {MobileNumber}",
-            "OK");
     }
 }
