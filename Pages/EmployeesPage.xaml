@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -9,90 +9,105 @@
     Title="Employees"
     BackgroundColor="{StaticResource Gray50}"
     Shell.NavBarIsVisible="False">
-    
     <Grid RowDefinitions="Auto,*">
-		<components:GradientHeader Grid.Row="0"
-                Title="Employees"
-                Subtitle="Manage your team members"
-                ActionButtonIcon="icon_plus.svg"
-                ActionButtonText="Add Employee"
-                ShowActionButton="True"
-                ActionButtonCommand="{Binding ShowAddEmployeeCommand}"/>
+        <!-- Header -->
+        <components:GradientHeader Grid.Row="0"
+                                   Title="Employees"
+                                   Subtitle="Manage your team members"
+                                   ActionButtonIcon="icon_plus.svg"
+                                   ActionButtonText="Add Employee"
+                                   ShowActionButton="True"
+                                   ActionButtonCommand="{Binding ShowAddEmployeeCommand}" />
 
-		<RefreshView Grid.Row="1"
+        <!-- Refresh + List -->
+        <RefreshView Grid.Row="1"
                      IsRefreshing="{Binding IsRefreshing}"
                      Command="{Binding LoadDataCommand}">
-			<CollectionView ItemsSource="{Binding Employees}">
-				<CollectionView.ItemTemplate>
-					<DataTemplate x:DataType="vm:EmployeeItemViewModel">
-						<Border Padding="16"
-								StrokeThickness="0"
-								BackgroundColor="{StaticResource White}"
-								Margin="0,0,0,12">
-							<Border.StrokeShape>
-								<RoundRectangle CornerRadius="12" />
-							</Border.StrokeShape>
-							<Border.Shadow>
-								<Shadow Brush="{StaticResource Gray900}"
-										Opacity="0.08"
-										Radius="10"
-										Offset="0,2" />
-							</Border.Shadow>
 
-							<Grid ColumnDefinitions="Auto,*,Auto">
-								<Border Grid.Column="0"
-										WidthRequest="56"
-										HeightRequest="56"
-										BackgroundColor="{StaticResource White}"
-										StrokeThickness="0"
-										VerticalOptions="Center">
-									<Border.StrokeShape>
-										<RoundRectangle CornerRadius="28" />
-									</Border.StrokeShape>
-									<Label Text="{Binding InitialsDisplay}"
-										   FontSize="20"
-										   FontAttributes="Bold"
-										   TextColor="{StaticResource White}"
-										   HorizontalOptions="Center"
-										   VerticalOptions="Center"/>
-								</Border>
+            <CollectionView ItemsSource="{Binding Employees}"
+                            Margin="16,12">
 
-								<VerticalStackLayout Grid.Column="1"
-													Spacing="4"
-													Margin="16,0,0,0"
-													VerticalOptions="Center">
-									<Label Text="{Binding Name}"
-										   FontSize="16"
-										   FontAttributes="Bold"
-										   TextColor="{StaticResource Gray900}"/>
-									<Label Text="{Binding Username}"
-										   FontSize="14"
-										   TextColor="{StaticResource Gray600}"/>
-									<HorizontalStackLayout Spacing="4">
-										<Label Text="??"
-											   FontSize="12"
-											   FontFamily="{OnPlatform Android='sans-serif', iOS='Arial'}"
-											   VerticalOptions="Center"/>
-										<Label Text="{Binding MobileNumber}"
-											   FontSize="13"
-											   TextColor="{StaticResource Gray600}"/>
-									</HorizontalStackLayout>
-								</VerticalStackLayout>
-							</Grid>
-						</Border>
-					</DataTemplate>
-				</CollectionView.ItemTemplate>
-				<CollectionView.EmptyViewTemplate>
-                    <DataTemplate>
-                        <Label IsVisible="{Binding HasNoEmployees}"
-                                   Text="No employees yet. Add team member first!"
-								   FontSize="16"
-								   TextColor="{StaticResource Gray500}"
-								   HorizontalOptions="Center"
-								   VerticalOptions="Center"/>
+                <!-- Employee Card Template -->
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:EmployeeItemViewModel">
+
+                        <Border Padding="16"
+                                StrokeThickness="0"
+                                BackgroundColor="{StaticResource White}"
+                                Margin="0,0,0,14"
+                                Shadow="{StaticResource Gray50}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="16">
+
+                                <!-- Initials Avatar -->
+                                <Grid WidthRequest="56"
+                                      HeightRequest="56"
+                                      BackgroundColor="{StaticResource Primary}"
+                                      HorizontalOptions="Start"
+                                      VerticalOptions="Center"
+                                      Padding="0">
+                                    <Grid.Clip>
+                                        <EllipseGeometry Center="28,28" RadiusX="28" RadiusY="28"/>
+                                    </Grid.Clip>
+                                    <Label Text="{Binding InitialsDisplay}"
+                                           FontSize="20"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource White}"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"/>
+                                </Grid>
+
+                                <!-- Employee Info -->
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="2"
+                                                     VerticalOptions="Center">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="{StaticResource Gray900}" />
+                                    <Label Text="{Binding MobileNumber}"
+                                           FontSize="13"
+                                           TextColor="{StaticResource Gray500}" />
+                                    
+                                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                                        <Label Text="{Binding Username}"
+                                               FontSize="14"
+                                               TextColor="{StaticResource Gray600}" />
+                                        <BoxView WidthRequest="1"
+                                                 HeightRequest="14"
+                                                 Color="{StaticResource Gray300}" />
+                                        <Label Text="{Binding Password}"
+                                               FontSize="14"
+                                               TextColor="{StaticResource Gray600}" />
+                                    </HorizontalStackLayout>
+
+                                </VerticalStackLayout>
+
+                            </Grid>
+                        </Border>
                     </DataTemplate>
-				</CollectionView.EmptyViewTemplate>
-			</CollectionView>
-		</RefreshView>
-	</Grid>
+                </CollectionView.ItemTemplate>
+                <!-- Empty View -->
+                <CollectionView.EmptyViewTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="8">
+                            <Label Text="No employees available"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   HorizontalOptions="Center"
+                                   TextColor="{StaticResource Gray700}" />
+
+                            <Label Text="Add your first employee to get started."
+                                   FontSize="14"
+                                   HorizontalOptions="Center"
+                                   TextColor="{StaticResource Gray500}" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.EmptyViewTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
 </ContentPage>

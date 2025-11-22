@@ -32,7 +32,7 @@
                     CornerRadius="8"
                     HeightRequest="20"/>
 
-            <Button Grid.Column="2"
+            <!--<Button Grid.Column="2"
                     Text="Print"
                     ImageSource="icon_print.svg"
                     ContentLayout="Left,12"
@@ -42,7 +42,7 @@
                     BorderColor="{StaticResource Gray200}"
                     BorderWidth="1"
                     CornerRadius="8"
-                    HeightRequest="20"/>
+                    HeightRequest="20"/>-->
         </Grid>
         <!-- Content -->
         <RefreshView Grid.Row="2"

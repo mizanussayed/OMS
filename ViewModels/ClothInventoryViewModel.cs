@@ -203,7 +203,6 @@ public partial class ClothInventoryViewModel(IDataService dataService, IAlert al
 public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataService, IAlert alertService, ClothInventoryViewModel parentViewModel) : ObservableObject
 {
     private Cloth _cloth = cloth;
-    
     public int Id => _cloth.Id;
     public string UniqueCode => _cloth.UniqueCode;
     public string Name => _cloth.Name + " (" + _cloth.UniqueCode + ")";
@@ -212,8 +211,7 @@ public partial class ClothInventoryItemViewModel(Cloth cloth, IDataService dataS
     public double TotalMeters => _cloth.TotalMeters;
     public double RemainingMeters => _cloth.RemainingMeters;
     public DateTime AddedDate => _cloth.AddedDate;
-
-    public double UsedMeters => TotalMeters - RemainingMeters;
+    public string UsedMeters => (TotalMeters - RemainingMeters).ToString("F2");
     public double TotalValue => RemainingMeters * PricePerMeter;
     public double UsagePercent => ((TotalMeters - RemainingMeters) / TotalMeters * 100);
     public bool IsLowStock => RemainingMeters < TotalMeters * 0.2;

@@ -66,6 +66,7 @@ public partial class EmployeeItemViewModel(Employee employee) : ObservableObject
     public string Name => _employee.Name;
     public string Username => _employee.Username;
     public string MobileNumber => _employee.MobileNumber;
+    public string Password => _employee.Password;
     public string InitialsDisplay => GetInitials(_employee.Name);
     
     private static string GetInitials(string name)

@@ -9,6 +9,7 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         //var connectionString = "";
+
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
@@ -26,6 +27,7 @@ public static class MauiProgram
             return new PostgresDataService(connectionString, settingsService);
         });
         builder.Services.AddSingleton<IAlert, AlertService>();
+        builder.Services.AddTransient<IBluetoothPrinterService, BluetoothPrinterService>();
         builder.Services.AddTransient<LoginViewModel>();
         builder.Services.AddTransient<DashboardViewModel>();
         builder.Services.AddTransient<ClothInventoryViewModel>();

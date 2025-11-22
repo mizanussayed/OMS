@@ -4,11 +4,10 @@ using OMS.Models;
 using OMS.Pages;
 using OMS.Services;
 using System.Collections.ObjectModel;
-using System.Security.Permissions;
 
 namespace OMS.ViewModels;
 
-public partial class DressOrdersViewModel(IDataService dataService, IAlert alertService) : ObservableObject
+public partial class DressOrdersViewModel(IDataService dataService, IAlert alertService, IBluetoothPrinterService printerService) : ObservableObject
 {
     [ObservableProperty]
     private ObservableCollection<DressOrderItemViewModel> orders = [];
@@ -20,6 +19,12 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
 
     [ObservableProperty]
     private bool isRefreshing;
+    
+    [ObservableProperty]
+    private bool isPrinting;
+    
+    [ObservableProperty]
+    private string printingStatus = string.Empty;
     
     [ObservableProperty]
     private string searchText = string.Empty;
@@ -64,8 +69,7 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
         try
         {
             var ordersList = await dataService.GetOrdersAsync();
-            var clothsList = await dataService.GetClothsAsync();
-            
+            var clothsList = await dataService.GetClothsAsync();           
             var orderViewModels = ordersList.Select(o => 
             {
                 var cloth = clothsList.FirstOrDefault(c => c.Id == o.ClothId);
@@ -98,13 +102,12 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
                 o.UniqueCode.Contains(search, StringComparison.CurrentCultureIgnoreCase) ||
                 o.DressType.Contains(search, StringComparison.CurrentCultureIgnoreCase));
         }
-        
         // Status filter
         if (SelectedStatusFilter.HasValue)
         {
             filtered = filtered.Where(o => o.Status == SelectedStatusFilter.Value);
         }
-        
+
         Orders = new ObservableCollection<DressOrderItemViewModel>(filtered);
         HasNoOrders = !Orders.Any();
     }
@@ -154,114 +157,148 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
     {
         try
         {
-
+            IsPrinting = true;
+            PrintingStatus = "Checking permissions...";
+            
             var permissionStatus = await CheckAndRequestBluetoothPermissions();
             if (!permissionStatus)
             {
-                await DisplayAlert("Permission Required",
-                    "Bluetooth permissions are required to connect to the printer. Please enable them in your device settings.",
+                IsPrinting = false;
+                await alertService.DisplayAlert("Permission Required",
+                    "Enable Bluetooth in your device settings.",
                     "OK");
                 return;
             }
 
-            var devices = await _printerService.GetPairedDevicesAsync();
+            PrintingStatus = "Searching for devices...";
+            var devices = await printerService.GetPairedDevicesAsync();
 
             if (devices.Count == 0)
             {
-                await DisplayAlert("Error", "No paired Bluetooth devices found. Please pair your printer first.", "OK");
+                IsPrinting = false;
+                await alertService.DisplayAlert("Error", "No paired Bluetooth devices found.", "OK");
                 return;
             }
 
-            var selectedDevice = await DisplayActionSheet("Select Printer", "Cancel", null, devices.ToArray());
+            // Show device selection sheet
+            IsPrinting = false;
+            var deviceArray = devices.ToArray();
+            var selectedDeviceName = await ShowDeviceSelectionDialog(deviceArray);
 
-            if (selectedDevice == "Cancel" || string.IsNullOrEmpty(selectedDevice))
+            if (string.IsNullOrEmpty(selectedDeviceName))
                 return;
 
-            loadingLabel.Text = $"Connecting to {selectedDevice}...";
-            loadingOverlay.IsVisible = true;
-            await Task.Delay(50);
-
-            var connected = await _printerService.ConnectAsync(selectedDevice);
+            // Start printing process
+            IsPrinting = true;
+            PrintingStatus = $"Connecting to {selectedDeviceName}...";
+            
+            var connected = await printerService.ConnectAsync(selectedDeviceName);
 
             if (!connected)
             {
-                loadingOverlay.IsVisible = false;
-                await DisplayAlert("Error", "Failed to connect to printer.", "OK");
+                IsPrinting = false;
+                await alertService.DisplayAlert("Error", "Failed to connect to printer.", "OK");
                 return;
             }
 
-            loadingLabel.Text = "Printing invoice...";
-            await Task.Delay(50);
+            PrintingStatus = "Printing orders...";
+            
+            // Print all orders report
+            var printed = await PrintOrdersReport();
 
-            // Fast text printing
-            var printed = await PrintInvoiceTextFast();
-
-            loadingOverlay.IsVisible = false;
-
+            IsPrinting = false;
+            
             if (printed)
             {
-                await DisplayAlert("Success", "Invoice printed successfully!", "OK");
-                await Navigation.PopModalAsync();
-                await Shell.Current.GoToAsync(nameof(NewOrderListPage));
+                await alertService.DisplayAlert("Success", "Orders printed successfully!", "OK");
             }
             else
             {
-                await DisplayAlert("Error", "Failed to print. Please check the printer and try again.", "OK");
+                await alertService.DisplayAlert("Error", "Failed to print.", "OK");
             }
 
-            await _printerService.DisconnectAsync();
+            await printerService.DisconnectAsync();
         }
         catch (Exception ex)
         {
-            loadingOverlay.IsVisible = false;
-            await DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
-        }
-        finally
-        {
-            loadingOverlay.IsVisible = false;
-            btnPrint.IsEnabled = true;
+            IsPrinting = false;
+            await alertService.DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
         }
     }
 
-    private async Task<bool> PrintInvoiceTextFast()
+    private static async Task<string?> ShowDeviceSelectionDialog(string[] devices)
+    {
+        if (devices.Length == 0)
+            return null;
+
+        if (devices.Length == 1)
+            return devices[0];
+
+        // Create and show device selection sheet
+        var tcs = new TaskCompletionSource<string?>();
+
+        var deviceSheet = new DeviceSelectionSheet(devices);
+        deviceSheet.DeviceSelected += (s, deviceName) =>
+        {
+            tcs.TrySetResult(deviceName);
+        };
+
+        deviceSheet.Disappearing += (s, e) =>
+        {
+            if (!tcs.Task.IsCompleted)
+            {
+                tcs.TrySetResult(null);
+            }
+        };
+
+        await Shell.Current.Navigation.PushModalAsync(deviceSheet);
+
+        return await tcs.Task;
+    }
+
+    private async Task<bool> PrintOrdersReport()
     {
         try
         {
-            // Header lines with larger font
-            var headerLines = new List<string>
+            var filteredOrders = Orders.ToList();
+            
+            if (filteredOrders.Count == 0)
             {
-                "YOUSUF TAILOR",
-            };
-
-            var headerPrinted = await _printerService.PrintFormattedTextAsync(headerLines, fontSize: 18, centerAlign: true, false);
-            if (!headerPrinted)
+                await alertService.DisplayAlert("No Orders", "No orders to print.", "OK");
                 return false;
+            }
 
-            var bodyLines = new List<string>
+            // Print each order
+            foreach (var order in filteredOrders)
             {
-                "Phone: 01730298184",
-                "Brahmanbaria Hawkers Market",
-                "",
-                "--------------------------------",
-                "          Advance Receipt       ",
-                "--------------------------------",
-                $"Customer: {_order.CustomerName}",
-                $"Mobile    : {_order.MobileNumber}",
-                $"Order Type     : {_order.OrderFor}",
-                "",
-                $"Total Amount   : {_order.TotalAmount}/-",
-                $"Paid Amount    : {_order.PaidAmount}/-",
-                $"Due Amount     : {_order.DueAmount}/-",
-                $"Delivery Date  : {_order.DeliveryDate:dd MMM yyyy}",
-                "",
-                "--------------------------------",
-                "",
-                "Thank you! Come again.",
-                "",
-                "",
-            };
+                // Header
+                var headerLines = new List<string>
+                {
+                    $"{order.UniqueCode.ToUpper()}",
+                };
 
-            return await _printerService.PrintFormattedTextAsync(bodyLines, fontSize: 12, centerAlign: true);
+                var headerPrinted = await printerService.PrintFormattedTextAsync(headerLines, fontSize: 18, centerAlign: true, false);
+                if (!headerPrinted)
+                    return false;
+
+                var orderLines = new List<string>
+                {
+                    $"Customer: {order.CustomerName.Replace($" ({order.UniqueCode})", "")}",
+                    $"Mobile: {order.MobileNumber}",
+                    $"Dress Type: {order.DressType}",
+                    $"Cloth: {order.ClothName}",
+                    $"Color: {order.ClothColor}",
+                    $"Meters Used: {order.MetersUsed}m",
+                    $"Cost: BDT {order.TotalCost:N2}",
+                    $"Order Date: {order.OrderDate:dd MMM yyyy}",
+                    "--------------------------------",
+                    ""
+                };
+                var orderPrinted = await printerService.PrintFormattedTextAsync(orderLines, fontSize: 10, centerAlign: false, true);
+                if (!orderPrinted)
+                    return false;
+            }
+            return true;
         }
         catch
         {
@@ -371,7 +408,7 @@ public partial class DressOrderItemViewModel(DressOrder order,
     {
         if (!IsPending)
         {
-            await alertService.DisplayAlert("Cannot Complete", "Only pending orders can be marked as completed.", "OK");
+            await alertService.DisplayAlert("Cannot Complete", "Only pending orders can be completed.", "OK");
             return;
         }
         
@@ -393,7 +430,7 @@ public partial class DressOrderItemViewModel(DressOrder order,
     {
         if (!IsCompleted)
         {
-            await alertService.DisplayAlert("Cannot Deliver", "Only completed orders can be marked as delivered.", "OK");
+            await alertService.DisplayAlert("Cannot Deliver", "Only completed orders can be delivered.", "OK");
             return;
         }
         
@@ -418,7 +455,7 @@ public partial class DressOrderItemViewModel(DressOrder order,
         {
             await alertService.DisplayAlert(
                 "Cannot Edit", 
-                "Only pending orders can be edited. This order has already been processed.", 
+                "Only pending orders can be edited.", 
                 "OK");
             return;
         }
@@ -445,14 +482,14 @@ public partial class DressOrderItemViewModel(DressOrder order,
         {
             await alertService.DisplayAlert(
                 "Cannot Delete", 
-                "Only pending orders can be deleted. This order has already been processed.", 
+                "Only pending orders can be deleted", 
                 "OK");
             return;
         }
         
         var confirmed = await alertService.DisplayConfirmAlert(
             "Delete Order",
-            $"Are you sure you want to delete order for '{order.CustomerName}'? This action cannot be undone.",
+            $"Are you sure you want to delete order for '{order.CustomerName}'?",
             "Delete",
             "Cancel");
 
@@ -473,15 +510,11 @@ public partial class DressOrderItemViewModel(DressOrder order,
     [RelayCommand]
     private async Task ShowOptions()
     {
-        // Only show edit/delete options for pending orders
         if (!IsPending)
         {
             await alertService.DisplayAlert(
                 "Order Processed", 
-                "This order has already been processed and cannot be edited or deleted.\n\n" +
-                $"Status: {StatusText}\n" +
-                $"Customer: {order.CustomerName}\n" +
-                $"Order Date: {OrderDate:MMM dd, yyyy}", 
+                "This order has been processed, cannot be edit/delete",
                 "OK");
             return;
         }
