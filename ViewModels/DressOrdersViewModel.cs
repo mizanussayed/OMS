@@ -4,6 +4,7 @@ using OMS.Models;
 using OMS.Pages;
 using OMS.Services;
 using System.Collections.ObjectModel;
+using System.Security.Permissions;
 
 namespace OMS.ViewModels;
 
@@ -151,8 +152,148 @@ public partial class DressOrdersViewModel(IDataService dataService, IAlert alert
     [RelayCommand]
     private async Task Print()
     {
-        // Implementation for printing cloth inventory report
-        await alertService.DisplayAlert("Print", "Print functionality is not implemented yet.", "OK");
+        try
+        {
+
+            var permissionStatus = await CheckAndRequestBluetoothPermissions();
+            if (!permissionStatus)
+            {
+                await DisplayAlert("Permission Required",
+                    "Bluetooth permissions are required to connect to the printer. Please enable them in your device settings.",
+                    "OK");
+                return;
+            }
+
+            var devices = await _printerService.GetPairedDevicesAsync();
+
+            if (devices.Count == 0)
+            {
+                await DisplayAlert("Error", "No paired Bluetooth devices found. Please pair your printer first.", "OK");
+                return;
+            }
+
+            var selectedDevice = await DisplayActionSheet("Select Printer", "Cancel", null, devices.ToArray());
+
+            if (selectedDevice == "Cancel" || string.IsNullOrEmpty(selectedDevice))
+                return;
+
+            loadingLabel.Text = $"Connecting to {selectedDevice}...";
+            loadingOverlay.IsVisible = true;
+            await Task.Delay(50);
+
+            var connected = await _printerService.ConnectAsync(selectedDevice);
+
+            if (!connected)
+            {
+                loadingOverlay.IsVisible = false;
+                await DisplayAlert("Error", "Failed to connect to printer.", "OK");
+                return;
+            }
+
+            loadingLabel.Text = "Printing invoice...";
+            await Task.Delay(50);
+
+            // Fast text printing
+            var printed = await PrintInvoiceTextFast();
+
+            loadingOverlay.IsVisible = false;
+
+            if (printed)
+            {
+                await DisplayAlert("Success", "Invoice printed successfully!", "OK");
+                await Navigation.PopModalAsync();
+                await Shell.Current.GoToAsync(nameof(NewOrderListPage));
+            }
+            else
+            {
+                await DisplayAlert("Error", "Failed to print. Please check the printer and try again.", "OK");
+            }
+
+            await _printerService.DisconnectAsync();
+        }
+        catch (Exception ex)
+        {
+            loadingOverlay.IsVisible = false;
+            await DisplayAlert("Error", $"An error occurred: {ex.Message}", "OK");
+        }
+        finally
+        {
+            loadingOverlay.IsVisible = false;
+            btnPrint.IsEnabled = true;
+        }
+    }
+
+    private async Task<bool> PrintInvoiceTextFast()
+    {
+        try
+        {
+            // Header lines with larger font
+            var headerLines = new List<string>
+            {
+                "YOUSUF TAILOR",
+            };
+
+            var headerPrinted = await _printerService.PrintFormattedTextAsync(headerLines, fontSize: 18, centerAlign: true, false);
+            if (!headerPrinted)
+                return false;
+
+            var bodyLines = new List<string>
+            {
+                "Phone: 01730298184",
+                "Brahmanbaria Hawkers Market",
+                "",
+                "--------------------------------",
+                "          Advance Receipt       ",
+                "--------------------------------",
+                $"Customer: {_order.CustomerName}",
+                $"Mobile    : {_order.MobileNumber}",
+                $"Order Type     : {_order.OrderFor}",
+                "",
+                $"Total Amount   : {_order.TotalAmount}/-",
+                $"Paid Amount    : {_order.PaidAmount}/-",
+                $"Due Amount     : {_order.DueAmount}/-",
+                $"Delivery Date  : {_order.DeliveryDate:dd MMM yyyy}",
+                "",
+                "--------------------------------",
+                "",
+                "Thank you! Come again.",
+                "",
+                "",
+            };
+
+            return await _printerService.PrintFormattedTextAsync(bodyLines, fontSize: 12, centerAlign: true);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static async Task<bool> CheckAndRequestBluetoothPermissions()
+    {
+#if ANDROID
+        if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.S)
+        {
+            var connectStatus = await Permissions.CheckStatusAsync<Permissions.Bluetooth>();
+            if (connectStatus != PermissionStatus.Granted)
+            {
+                connectStatus = await Permissions.RequestAsync<Permissions.Bluetooth>();
+                if (connectStatus != PermissionStatus.Granted)
+                    return false;
+            }
+        }
+        else
+        {
+            var locationStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            if (locationStatus != PermissionStatus.Granted)
+            {
+                locationStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                if (locationStatus != PermissionStatus.Granted)
+                    return false;
+            }
+        }
+#endif
+        return true;
     }
 }
 
