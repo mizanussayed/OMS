@@ -5,7 +5,7 @@
              x:Name="this">
     
     <Grid Background="{StaticResource PurplePinkGradient}" 
-          Padding="20,20,20,20"
+          Padding="20, 25, 20, 20"
           HeightRequest="80">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
